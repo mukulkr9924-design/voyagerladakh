@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 
 export default function ContactContent() {
   const [formData, setFormData] = useState({
@@ -10,12 +10,33 @@ export default function ContactContent() {
     phone: "",
     message: ""
   });
+  const [submitting, setSubmitting] = useState(false);
+  const [feedback, setFeedback] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
-    alert("Thank you for your message! We'll get back to you soon.");
-    setFormData({ name: "", email: "", phone: "", message: "" });
+    setSubmitting(true);
+    setFeedback("");
+
+    try {
+      const response = await fetch("/api/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "contact", ...formData })
+      });
+
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || "Unable to send your message. Please try again.");
+      }
+
+      setFeedback("Thank you for your message! We'll get back to you soon.");
+      setFormData({ name: "", email: "", phone: "", message: "" });
+    } catch (error) {
+      setFeedback(error instanceof Error ? error.message : "Unable to send your message. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -191,13 +212,15 @@ export default function ContactContent() {
                     style={{ minHeight: "120px", padding: "12px 14px", background: "white", border: "1px solid var(--line)", color: "var(--text)", fontFamily: "inherit", resize: "vertical" }}
                   />
                 </div>
+                {feedback ? <p className="form-feedback">{feedback}</p> : null}
                 <motion.button
                   type="submit"
                   className="btn primary"
                   whileHover={{ scale: 1.02, y: -2 }}
                   whileTap={{ scale: 0.98 }}
+                  disabled={submitting}
                 >
-                  Send Message
+                  {submitting ? "Sending..." : "Send Message"}
                 </motion.button>
               </form>
             </motion.div>
