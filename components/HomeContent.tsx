@@ -35,9 +35,9 @@ export default function HomeContent() {
         >
           {[
             { icon: "✦", title: "Trekking & Hiking", desc: "High passes, river valleys and remote ridge trails.", href: "/trekking-hiking" },
+            { icon: "⛰", title: "Mountaineering", desc: "6,000m peaks, technical climbs and high-altitude summits.", href: "/mountaineering" },
             { icon: "♞", title: "Motorbike Touring", desc: "Leh roads, high passes and mountain highway routes.", href: "/motorbike-touring" },
-            { icon: "☼", title: "Spiritual Journeys", desc: "Monasteries, quiet walks and reflection in isolation.", href: "/spiritual-journeys" },
-            { icon: "✎", title: "Cultural & Village Tours", desc: "Homestays, craft, markets and village traditions.", href: "/cultural-tours" },
+            { icon: "☼", title: "Soul of Ladakh", desc: "Monasteries, village traditions, craft and quiet reflection.", href: "/soul-of-ladakh" },
           ].map((activity) => (
             <motion.article
               key={activity.title}

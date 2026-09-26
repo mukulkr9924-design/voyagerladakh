@@ -4,14 +4,14 @@ import TripDetailTemplate from "@/components/TripDetailTemplate";
 import { getTripBySlug, trips } from "@/lib/trips";
 
 export function generateStaticParams() {
-  return trips.filter((trip) => trip.activityType === "motorbike").map((trip) => ({ slug: trip.slug }));
+  return trips.filter((trip) => trip.activityType === "motorbike-touring").map((trip) => ({ slug: trip.slug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const trip = getTripBySlug(slug);
 
-  if (!trip || trip.activityType !== "motorbike") {
+  if (!trip || trip.activityType !== "motorbike-touring") {
     return {
       title: "Motorbike Tour in Ladakh | Voyager Ladakh",
       description: "Ride through Ladakh mountain roads, high passes and iconic valleys with Voyager Ladakh motorcycle tours.",
@@ -36,7 +36,7 @@ export default async function MotorbikeDetailPage({ params }: { params: Promise<
   const { slug } = await params;
   const trip = getTripBySlug(slug);
 
-  if (!trip || trip.activityType !== "motorbike") {
+  if (!trip || trip.activityType !== "motorbike-touring") {
     redirect("/coming-soon");
   }
 

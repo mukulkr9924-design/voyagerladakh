@@ -7,10 +7,12 @@ import { motion, AnimatePresence } from "framer-motion";
 
 const megamenu = {
   trekking: [
-    { title: "Markha Valley Trek", href: "/trekking-hiking/markha-valley-trek" },
-    { title: "Zanskar High Trail", href: "/trekking-hiking/zanskar-trail" },
-    { title: "Moonland Ridge Walk", href: "/trekking-hiking/moonland-ridge-walk" },
-    { title: "Khardung to Pangong", href: "/trekking-hiking/khardung-pangong" }
+    { title: "Sham Valley Trek", href: "/trekking-hiking/sham-valley-trek" },
+    { title: "Lamayuru to Chilling", href: "/trekking-hiking/lamayuru-chilling-trek" },
+    { title: "Rumtse to Tso Moriri", href: "/trekking-hiking/rumtse-tso-moriri-trek" },
+    { title: "Markha Valley (Chilling)", href: "/trekking-hiking/markha-valley-chilling-trek" },
+    { title: "Markha Valley (Spituk)", href: "/trekking-hiking/markha-valley-spituk-trek" },
+    { title: "Jhunglam Trek", href: "/trekking-hiking/jhunglam-hemis-padum-trek" }
   ],
   motorbike: [
     { title: "Leh to Nubra Circuit", href: "/motorbike-touring/lehmotorbike-nubra-sky" },
@@ -18,17 +20,16 @@ const megamenu = {
     { title: "Pangong High Road", href: "/motorbike-touring/pangong-high-road" },
     { title: "Spiti Crossing", href: "/motorbike-touring/spiti-crossing" }
   ],
-  spiritual: [
-    { title: "Leh Spiritual Retreat", href: "/spiritual-journeys/leh-spiritual-retreat" },
-    { title: "Prayer Walk Circuit", href: "/spiritual-journeys/prayer-walk-circuit" },
-    { title: "Monastery Stillness", href: "/spiritual-journeys/monastery-stillness" },
-    { title: "Inner Pass Pilgrimage", href: "/spiritual-journeys/inner-pass-pilgrimage" }
+  soulOfLadakh: [
+    { title: "Leh Spiritual Retreat", href: "/soul-of-ladakh/leh-spiritual-retreat" },
+    { title: "Village Culture Circuit", href: "/soul-of-ladakh/village-culture-leh" }
   ],
-  cultural: [
-    { title: "Village Culture Circuit", href: "/cultural-tours/village-culture-leh" },
-    { title: "Ladakh Craft Week", href: "/cultural-tours/ladakh-craft-week" },
-    { title: "Homestay Valley Loop", href: "/cultural-tours/homestay-valley-loop" },
-    { title: "Monastery Kitchen Trail", href: "/cultural-tours/monastery-kitchen-trail" }
+  mountaineering: [
+    { title: "Kang Yatse II", href: "/mountaineering/kang-yatse-ii" },
+    { title: "Kang Yatse I", href: "/mountaineering/kang-yatse-i" },
+    { title: "Kang Yatse I & II", href: "/mountaineering/kang-yatse-i-ii" },
+    { title: "Mentok Kangri", href: "/mountaineering/mentok-kangri" },
+    { title: "Dzo Jongo East & West", href: "/mountaineering/dzo-jongo-east-west" }
   ]
 };
 
@@ -101,8 +102,8 @@ export default function Header() {
                       ))}
                     </div>
                     <div className="mega-col">
-                      <div className="mega-title">Spiritual Journeys</div>
-                      {megamenu.spiritual.map((item, i) => (
+                      <div className="mega-title">Soul of Ladakh</div>
+                      {megamenu.soulOfLadakh.map((item, i) => (
                         <motion.div
                           key={item.href}
                           initial={{ opacity: 0, x: -10 }}
@@ -116,8 +117,8 @@ export default function Header() {
                       ))}
                     </div>
                     <div className="mega-col">
-                      <div className="mega-title">Cultural & Village Tours</div>
-                      {megamenu.cultural.map((item, i) => (
+                      <div className="mega-title">Mountaineering</div>
+                      {megamenu.mountaineering.map((item, i) => (
                         <motion.div
                           key={item.href}
                           initial={{ opacity: 0, x: -10 }}
@@ -134,9 +135,9 @@ export default function Header() {
                 )}
               </AnimatePresence>
             </div>
+            <Link href="/mountaineering" onClick={closeDrawer}>Mountaineering</Link>
             <Link href="/motorbike-touring" onClick={closeDrawer}>Motorbike Touring</Link>
-            <Link href="/spiritual-journeys" onClick={closeDrawer}>Spiritual Journeys</Link>
-            <Link href="/cultural-tours" onClick={closeDrawer}>Cultural & Village Tours</Link>
+            <Link href="/soul-of-ladakh" onClick={closeDrawer}>Soul of Ladakh</Link>
             <Link href="/plan-your-trip" onClick={closeDrawer}>Plan your trip</Link>
             <Link href="/contact" onClick={closeDrawer}>Contact</Link>
           </nav>
@@ -177,9 +178,9 @@ export default function Header() {
               <nav className="drawer-nav">
                 {[
                   { label: "Trekking & Hiking", href: "/trekking-hiking" },
+                  { label: "Mountaineering", href: "/mountaineering" },
                   { label: "Motorbike Touring", href: "/motorbike-touring" },
-                  { label: "Spiritual Journeys", href: "/spiritual-journeys" },
-                  { label: "Cultural & Village Tours", href: "/cultural-tours" },
+                  { label: "Soul of Ladakh", href: "/soul-of-ladakh" },
                   { label: "Plan your trip", href: "/plan-your-trip" },
                   { label: "Contact", href: "/contact" },
                 ].map((item, i) => (

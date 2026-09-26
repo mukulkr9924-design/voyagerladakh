@@ -230,13 +230,14 @@ body img {
   max-width: 1320px;
   width: 100%;
   margin: 0 auto;
-  padding: 80px 40px;
+  padding: 40px 40px 80px;
+  transform: translateY(-18px);
 }
 
 .hero-content h1 {
   max-width: 780px;
   margin: 16px 0 16px;
-  font-size: clamp(70px, 6vw, 110px);
+  font-size: clamp(52px, 5vw, 90px);
   font-family: var(--font-geist-sans);
   font-weight: 500;
   line-height: 0.93;
@@ -489,6 +490,18 @@ body img {
   font-family: var(--font-geist-sans);
   font-weight: 500;
   margin: 20px 0 12px;
+}
+
+.trip-description {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--muted);
+  margin: 8px 0 16px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-clamp: 3;
 }
 
 .trip-details {

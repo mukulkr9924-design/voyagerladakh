@@ -4,8 +4,8 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { trips } from "@/lib/trips";
 
-export default function CulturalContent() {
-  const culturalTrips = trips.filter((trip) => trip.activityType === "cultural");
+export default function SoulOfLadakhContent() {
+  const soulOfLadakhTrips = trips.filter((trip) => trip.activityType === "soul-of-ladakh");
 
   return (
     <motion.section
@@ -21,8 +21,8 @@ export default function CulturalContent() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
       >
-        <span className="kicker">Cultural & Village Tours</span>
-        <h2>Villages, craft and living traditions</h2>
+        <span className="kicker">Soul of Ladakh</span>
+        <h2>Spiritual journeys & cultural traditions</h2>
       </motion.div>
       <motion.div
         className="trip-card-row"
@@ -30,7 +30,7 @@ export default function CulturalContent() {
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2, staggerChildren: 0.1 }}
       >
-        {culturalTrips.map((trip) => (
+        {soulOfLadakhTrips.map((trip) => (
           <motion.article
             key={trip.id}
             className="trip-card"
@@ -54,7 +54,7 @@ export default function CulturalContent() {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.2 }}
               >
-                <Link href={`/cultural-tours/${trip.slug}`}>View trip</Link>
+                <Link href={`/soul-of-ladakh/${trip.slug}`}>View trip</Link>
               </motion.span>
             </div>
             <div className="trip-content">

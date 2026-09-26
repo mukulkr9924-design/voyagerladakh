@@ -4,7 +4,7 @@ import TripDetailTemplate from "@/components/TripDetailTemplate";
 import { getTripBySlug, trips } from "@/lib/trips";
 
 export function generateStaticParams() {
-  return trips.filter((trip) => trip.activityType === "trekking").map((trip) => ({ slug: trip.slug }));
+  return trips.filter((trip) => trip.activityType === "trekking-hiking").map((trip) => ({ slug: trip.slug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {

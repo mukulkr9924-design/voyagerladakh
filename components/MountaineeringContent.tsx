@@ -4,8 +4,8 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { trips } from "@/lib/trips";
 
-export default function SpiritualContent() {
-  const spiritualTrips = trips.filter((trip) => trip.activityType === "spiritual");
+export default function MountaineeringContent() {
+  const mountaineeringTrips = trips.filter((trip) => trip.activityType === "mountaineering");
 
   return (
     <motion.section
@@ -21,8 +21,8 @@ export default function SpiritualContent() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
       >
-        <span className="kicker">Spiritual Journeys</span>
-        <h2>Quiet routes for reflection</h2>
+        <span className="kicker">Mountaineering</span>
+        <h2>Summits above 6,000m</h2>
       </motion.div>
       <motion.div
         className="trip-card-row"
@@ -30,7 +30,7 @@ export default function SpiritualContent() {
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2, staggerChildren: 0.1 }}
       >
-        {spiritualTrips.map((trip) => (
+        {mountaineeringTrips.map((trip) => (
           <motion.article
             key={trip.id}
             className="trip-card"
@@ -54,7 +54,7 @@ export default function SpiritualContent() {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.2 }}
               >
-                <Link href={`/spiritual-journeys/${trip.slug}`}>View trip</Link>
+                <Link href={`/mountaineering/${trip.slug}`}>View trip</Link>
               </motion.span>
             </div>
             <div className="trip-content">

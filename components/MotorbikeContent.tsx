@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { trips } from "@/lib/trips";
 
 export default function MotorbikeContent() {
-  const motorbikeTrips = trips.filter((trip) => trip.activityType === "motorbike");
+  const motorbikeTrips = trips.filter((trip) => trip.activityType === "motorbike-touring");
 
   return (
     <motion.section

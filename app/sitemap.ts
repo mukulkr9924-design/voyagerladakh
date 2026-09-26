@@ -36,13 +36,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.9,
     },
     {
-      url: `${baseUrl}/spiritual-journeys`,
+      url: `${baseUrl}/soul-of-ladakh`,
       lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.9,
     },
     {
-      url: `${baseUrl}/cultural-tours`,
+      url: `${baseUrl}/mountaineering`,
       lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.9,

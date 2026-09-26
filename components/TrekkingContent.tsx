@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { trips } from "@/lib/trips";
 
 export default function TrekkingContent() {
-  const trekkingTrips = trips.filter((trip) => trip.activityType === "trekking");
+  const trekkingTrips = trips.filter((trip) => trip.activityType === "trekking-hiking");
 
   return (
     <motion.section

@@ -30,7 +30,7 @@ export default function TripCard({ trip }: { trip: Trip }) {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
         >
-          <Link href={`/trekking-hiking/${trip.slug}`}>View trip</Link>
+          <Link href={`/${trip.activityType}/${trip.slug}`}>View trip</Link>
         </motion.span>
       </div>
       <div className="trip-content">
@@ -45,6 +45,14 @@ export default function TripCard({ trip }: { trip: Trip }) {
         >
           {trip.title}
         </motion.h3>
+        <motion.p
+          className="trip-description"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25 }}
+        >
+          {trip.description}
+        </motion.p>
         <motion.div
           className="trip-details"
           initial={{ opacity: 0, y: 10 }}

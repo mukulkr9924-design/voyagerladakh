@@ -4,7 +4,7 @@ A modern, responsive travel website showcasing the beauty and adventures of Lada
 
 ## Features
 
-- **Tour Packages**: Multiple tour categories including cultural tours, motorbike touring, spiritual journeys, and trekking/hiking
+- **Tour Packages**: Multiple tour categories including soul of Ladakh (spiritual & cultural experiences), motorbike touring, and trekking/hiking
 - **Interactive Components**: Animated route maps, itinerary accordions, and trip cards
 - **Responsive Design**: Mobile-first approach with Tailwind CSS
 - **Smooth Animations**: Powered by Framer Motion and GSAP
@@ -41,9 +41,8 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 ├── app/                    # Next.js app directory
 │   ├── about/             # About page
 │   ├── contact/           # Contact page
-│   ├── cultural-tours/    # Cultural tour packages
 │   ├── motorbike-touring/ # Motorbike tour packages
-│   ├── spiritual-journeys/# Spiritual journey packages
+│   ├── soul-of-ladakh/    # Soul of Ladakh (spiritual & cultural) packages
 │   ├── trekking-hiking/   # Trekking & hiking packages
 │   ├── plan-your-trip/    # Trip planning page
 │   └── coming-soon/       # Coming soon page

@@ -24,11 +24,12 @@ export default function Footer() {
           transition={{ duration: 0.6, delay: 0.1 }}
         >
           {[
-            { label: "Trekking", href: "/trekking-hiking" },
-            { label: "Motorbike", href: "/motorbike-touring" },
-            { label: "Spiritual", href: "/spiritual-journeys" },
-            { label: "Cultural", href: "/cultural-tours" },
+            { label: "Trekking & Hiking", href: "/trekking-hiking" },
+            { label: "Mountaineering", href: "/mountaineering" },
+            { label: "Motorbike Touring", href: "/motorbike-touring" },
+            { label: "Soul of Ladakh", href: "/soul-of-ladakh" },
             { label: "Plan your trip", href: "/plan-your-trip" },
+            { label: "Contact", href: "/contact" },
           ].map((item, i) => (
             <motion.div
               key={item.href}
