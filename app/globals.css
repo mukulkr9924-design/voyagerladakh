@@ -704,29 +704,28 @@ body img {
   position: relative;
 }
 
+.mega-menu-shell {
+  position: fixed;
+  inset: 86px 0 auto 0;
+  display: flex;
+  justify-content: center;
+  padding: 0 20px;
+  pointer-events: none;
+  z-index: 30;
+}
+
 .mega-menu {
-  position: absolute;
-  left: -260px;
-  top: 38px;
-  width: min(980px, 70vw);
+  position: relative;
+  width: min(1120px, calc(100vw - 72px));
+  max-width: calc(100vw - 72px);
   background: var(--paper);
   color: var(--text);
   border: 1px solid var(--line);
   box-shadow: 0 30px 80px rgba(0,0,0,0.16);
-  padding: 24px;
+  padding: 24px 22px;
   display: grid;
   grid-template-columns: repeat(4, minmax(150px, 1fr));
-  gap: 20px;
-  opacity: 0;
-  transform: translateY(12px);
-  pointer-events: none;
-  transition: opacity 260ms ease, transform 260ms ease;
-}
-
-.mega-hover:hover .mega-menu,
-.mega-hover:focus-within .mega-menu {
-  opacity: 1;
-  transform: translateY(0);
+  gap: 22px;
   pointer-events: auto;
 }
 

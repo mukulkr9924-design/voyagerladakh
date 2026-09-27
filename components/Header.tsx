@@ -37,6 +37,7 @@ export default function Header() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [megaOpen, setMegaOpen] = useState<string | null>(null);
+  const [megaTimeout, setMegaTimeout] = useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -47,7 +48,15 @@ export default function Header() {
   }, []);
 
   const closeDrawer = () => setDrawerOpen(false);
-  const closeMega = () => setMegaOpen(null);
+  const closeMega = () => {
+    if (megaTimeout) clearTimeout(megaTimeout);
+    setMegaTimeout(setTimeout(() => setMegaOpen(null), 150));
+  };
+
+  const openMega = (category: string) => {
+    if (megaTimeout) clearTimeout(megaTimeout);
+    setMegaOpen(category);
+  };
 
   return (
     <>
@@ -60,20 +69,38 @@ export default function Header() {
             </Link>
           </div>
           <nav className="main-nav">
-            <div className="mega-hover" onMouseEnter={() => setMegaOpen("trekking")} onMouseLeave={closeMega}>
+            <div className="mega-hover" onMouseEnter={() => openMega("trekking")} onMouseLeave={closeMega}>
               <Link href="/trekking-hiking" onClick={closeDrawer}>Trekking & Hiking</Link>
               <AnimatePresence>
                 {megaOpen === "trekking" && (
-                  <motion.div
-                    className="mega-menu"
-                    initial={{ opacity: 0, y: 12, scaleY: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scaleY: 1 }}
-                    exit={{ opacity: 0, y: -8, scaleY: 0.95 }}
-                    transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                  >
+                  <div className="mega-menu-shell">
+                    <motion.div
+                      className="mega-menu"
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -8 }}
+                      transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                      onMouseEnter={() => openMega("trekking")}
+                      onMouseLeave={closeMega}
+                    >
                     <div className="mega-col">
                       <div className="mega-title">Trekking & Hiking</div>
                       {megamenu.trekking.map((item, i) => (
+                        <motion.div
+                          key={item.href}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: i * 0.04 }}
+                        >
+                          <Link href={item.href} onClick={closeMega} className="mega-link">
+                            {item.title}
+                          </Link>
+                        </motion.div>
+                      ))}
+                    </div>
+                    <div className="mega-col">
+                      <div className="mega-title">Mountaineering</div>
+                      {megamenu.mountaineering.map((item, i) => (
                         <motion.div
                           key={item.href}
                           initial={{ opacity: 0, x: -10 }}
@@ -116,6 +143,40 @@ export default function Header() {
                         </motion.div>
                       ))}
                     </div>
+                    </motion.div>
+                  </div>
+                )}
+              </AnimatePresence>
+            </div>
+            <div className="mega-hover" onMouseEnter={() => openMega("mountaineering")} onMouseLeave={closeMega}>
+              <Link href="/mountaineering" onClick={closeDrawer}>Mountaineering</Link>
+              <AnimatePresence>
+                {megaOpen === "mountaineering" && (
+                  <div className="mega-menu-shell">
+                    <motion.div
+                      className="mega-menu"
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -8 }}
+                      transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                      onMouseEnter={() => openMega("mountaineering")}
+                      onMouseLeave={closeMega}
+                    >
+                    <div className="mega-col">
+                      <div className="mega-title">Trekking & Hiking</div>
+                      {megamenu.trekking.map((item, i) => (
+                        <motion.div
+                          key={item.href}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: i * 0.04 }}
+                        >
+                          <Link href={item.href} onClick={closeMega} className="mega-link">
+                            {item.title}
+                          </Link>
+                        </motion.div>
+                      ))}
+                    </div>
                     <div className="mega-col">
                       <div className="mega-title">Mountaineering</div>
                       {megamenu.mountaineering.map((item, i) => (
@@ -131,13 +192,199 @@ export default function Header() {
                         </motion.div>
                       ))}
                     </div>
-                  </motion.div>
+                    <div className="mega-col">
+                      <div className="mega-title">Motorbike Touring</div>
+                      {megamenu.motorbike.map((item, i) => (
+                        <motion.div
+                          key={item.href}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: i * 0.04 }}
+                        >
+                          <Link href={item.href} onClick={closeMega} className="mega-link">
+                            {item.title}
+                          </Link>
+                        </motion.div>
+                      ))}
+                    </div>
+                    <div className="mega-col">
+                      <div className="mega-title">Soul of Ladakh</div>
+                      {megamenu.soulOfLadakh.map((item, i) => (
+                        <motion.div
+                          key={item.href}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: i * 0.04 }}
+                        >
+                          <Link href={item.href} onClick={closeMega} className="mega-link">
+                            {item.title}
+                          </Link>
+                        </motion.div>
+                      ))}
+                    </div>
+                    </motion.div>
+                  </div>
                 )}
               </AnimatePresence>
             </div>
-            <Link href="/mountaineering" onClick={closeDrawer}>Mountaineering</Link>
-            <Link href="/motorbike-touring" onClick={closeDrawer}>Motorbike Touring</Link>
-            <Link href="/soul-of-ladakh" onClick={closeDrawer}>Soul of Ladakh</Link>
+            <div className="mega-hover" onMouseEnter={() => openMega("motorbike")} onMouseLeave={closeMega}>
+              <Link href="/motorbike-touring" onClick={closeDrawer}>Motorbike Touring</Link>
+              <AnimatePresence>
+                {megaOpen === "motorbike" && (
+                  <div className="mega-menu-shell">
+                    <motion.div
+                      className="mega-menu"
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -8 }}
+                      transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                      onMouseEnter={() => openMega("motorbike")}
+                      onMouseLeave={closeMega}
+                    >
+                    <div className="mega-col">
+                      <div className="mega-title">Trekking & Hiking</div>
+                      {megamenu.trekking.map((item, i) => (
+                        <motion.div
+                          key={item.href}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: i * 0.04 }}
+                        >
+                          <Link href={item.href} onClick={closeMega} className="mega-link">
+                            {item.title}
+                          </Link>
+                        </motion.div>
+                      ))}
+                    </div>
+                    <div className="mega-col">
+                      <div className="mega-title">Mountaineering</div>
+                      {megamenu.mountaineering.map((item, i) => (
+                        <motion.div
+                          key={item.href}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: i * 0.04 }}
+                        >
+                          <Link href={item.href} onClick={closeMega} className="mega-link">
+                            {item.title}
+                          </Link>
+                        </motion.div>
+                      ))}
+                    </div>
+                    <div className="mega-col">
+                      <div className="mega-title">Motorbike Touring</div>
+                      {megamenu.motorbike.map((item, i) => (
+                        <motion.div
+                          key={item.href}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: i * 0.04 }}
+                        >
+                          <Link href={item.href} onClick={closeMega} className="mega-link">
+                            {item.title}
+                          </Link>
+                        </motion.div>
+                      ))}
+                    </div>
+                    <div className="mega-col">
+                      <div className="mega-title">Soul of Ladakh</div>
+                      {megamenu.soulOfLadakh.map((item, i) => (
+                        <motion.div
+                          key={item.href}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: i * 0.04 }}
+                        >
+                          <Link href={item.href} onClick={closeMega} className="mega-link">
+                            {item.title}
+                          </Link>
+                        </motion.div>
+                      ))}
+                    </div>
+                    </motion.div>
+                  </div>
+                )}
+              </AnimatePresence>
+            </div>
+            <div className="mega-hover" onMouseEnter={() => openMega("soulOfLadakh")} onMouseLeave={closeMega}>
+              <Link href="/soul-of-ladakh" onClick={closeDrawer}>Soul of Ladakh</Link>
+              <AnimatePresence>
+                {megaOpen === "soulOfLadakh" && (
+                  <div className="mega-menu-shell">
+                    <motion.div
+                      className="mega-menu"
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -8 }}
+                      transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                      onMouseEnter={() => openMega("soulOfLadakh")}
+                      onMouseLeave={closeMega}
+                    >
+                    <div className="mega-col">
+                      <div className="mega-title">Trekking & Hiking</div>
+                      {megamenu.trekking.map((item, i) => (
+                        <motion.div
+                          key={item.href}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: i * 0.04 }}
+                        >
+                          <Link href={item.href} onClick={closeMega} className="mega-link">
+                            {item.title}
+                          </Link>
+                        </motion.div>
+                      ))}
+                    </div>
+                    <div className="mega-col">
+                      <div className="mega-title">Mountaineering</div>
+                      {megamenu.mountaineering.map((item, i) => (
+                        <motion.div
+                          key={item.href}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: i * 0.04 }}
+                        >
+                          <Link href={item.href} onClick={closeMega} className="mega-link">
+                            {item.title}
+                          </Link>
+                        </motion.div>
+                      ))}
+                    </div>
+                    <div className="mega-col">
+                      <div className="mega-title">Motorbike Touring</div>
+                      {megamenu.motorbike.map((item, i) => (
+                        <motion.div
+                          key={item.href}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: i * 0.04 }}
+                        >
+                          <Link href={item.href} onClick={closeMega} className="mega-link">
+                            {item.title}
+                          </Link>
+                        </motion.div>
+                      ))}
+                    </div>
+                    <div className="mega-col">
+                      <div className="mega-title">Soul of Ladakh</div>
+                      {megamenu.soulOfLadakh.map((item, i) => (
+                        <motion.div
+                          key={item.href}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: i * 0.04 }}
+                        >
+                          <Link href={item.href} onClick={closeMega} className="mega-link">
+                            {item.title}
+                          </Link>
+                        </motion.div>
+                      ))}
+                    </div>
+                    </motion.div>
+                  </div>
+                )}
+              </AnimatePresence>
+            </div>
             <Link href="/plan-your-trip" onClick={closeDrawer}>Plan your trip</Link>
             <Link href="/contact" onClick={closeDrawer}>Contact</Link>
           </nav>
