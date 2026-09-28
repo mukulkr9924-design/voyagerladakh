@@ -44,8 +44,8 @@ export const activities: Activity[] = [
       "From the gentle apricot-village walks of Sham Valley to multi-day crossings of 5,000 m passes on the Markha and Rupshu trails, every trek is led by local Ladakhi guides with homestay or camping support.",
     metaTitle: "Trekking & Hiking Tours in Ladakh",
     metaDescription:
-      "Guided Ladakh treks from Leh: Sham Valley, Markha Valley, Lamayuru to Chilling, Rumtse to Tso Moriri and Zanskar crossings. Local guides, homestays and camping.",
-    keywords: ["Ladakh trekking", "Markha Valley trek", "Sham Valley trek", "Zanskar trek", "Tso Moriri trek"],
+      "Guided Ladakh treks from Leh: Sham Valley, Markha Valley, Lamayuru to Chilling, Rumtse to Tso Moriri, Nubra and Zanskar crossings. Local guides, homestays and camping.",
+    keywords: ["Ladakh trekking", "Markha Valley trek", "Sham Valley trek", "Zanskar trek", "Tso Moriri trek", "Nubra Valley trek"],
   },
   {
     type: "mountaineering",
@@ -56,32 +56,32 @@ export const activities: Activity[] = [
       "Kang Yatse, Dzo Jongo and Mentok Kangri are some of the most rewarding 6,000 m objectives in the Indian Himalaya. Our expeditions include acclimatisation days, certified guides and full technical support.",
     metaTitle: "Mountaineering Expeditions in Ladakh – 6,000 m Peaks",
     metaDescription:
-      "Climb Kang Yatse I & II, Dzo Jongo and Mentok Kangri with a Leh-based team. Guided 6,000 m mountaineering expeditions with acclimatisation and technical support.",
+      "Climb Kang Yatse I, Kang Yatse II, Dzo Jongo and Mentok Kangri with a Leh-based team. Guided 6,000 m mountaineering expeditions with acclimatisation and technical support.",
     keywords: ["Ladakh mountaineering", "Kang Yatse expedition", "Dzo Jongo climb", "Mentok Kangri", "6000m peaks India"],
   },
   {
     type: "motorbike-touring",
     name: "Motorbike Touring",
-    short: "Khardung La, Pangong and the high mountain highways.",
-    heading: "Motorbike tours from Leh",
+    short: "Umling La, Khardung La, Pangong and the Srinagar–Leh–Manali highways.",
+    heading: "Motorbike tours in Ladakh",
     intro:
-      "Ride over some of the world's highest motorable passes to the dunes of Nubra and the shores of Pangong. Tours include well-maintained bikes, a backup vehicle and a mechanic who knows every hairpin.",
-    metaTitle: "Motorbike Tours in Ladakh – Leh, Nubra & Pangong",
+      "Ride the Srinagar–Leh–Manali highways and over the Umling La, the highest motorable road in the world, by way of Khardung La, Nubra, Pangong and Hanle. Tours include a Royal Enfield Himalayan with fuel, a support vehicle, a road captain and a mechanic who knows every hairpin.",
+    metaTitle: "Ladakh Bike Trips – Srinagar, Leh, Umling La & Manali",
     metaDescription:
-      "Leh motorbike tours over Khardung La to Nubra Valley and Pangong Lake. Bikes, backup vehicle, mechanic and local road captains included.",
-    keywords: ["Ladakh bike trip", "Leh motorbike tour", "Khardung La ride", "Nubra Pangong bike tour"],
+      "Guided Royal Enfield tours from Srinagar or Leh to Manali over Khardung La and Umling La, via Nubra, Pangong, Hanle and Tso Moriri. Bike, fuel, backup vehicle and mechanic included.",
+    keywords: ["Ladakh bike trip", "Srinagar Leh Manali bike trip", "Umling La bike trip", "Leh motorbike tour", "Khardung La ride", "Hanle Tso Moriri bike tour"],
   },
   {
     type: "soul-of-ladakh",
     name: "Soul of Ladakh",
-    short: "Monasteries, village homestays and quiet reflection.",
-    heading: "Cultural & spiritual journeys",
+    short: "Monasteries, village walks, Zanskar and the snow leopard.",
+    heading: "Cultural, spiritual & wildlife journeys",
     intro:
-      "Slow journeys through Hemis and Thiksey monasteries, village homestays and craft traditions — designed for travellers who want to understand Ladakh, not just see it.",
-    metaTitle: "Cultural & Spiritual Tours in Ladakh",
+      "Slow journeys through Ladakh's monasteries and villages: a spiritual retreat from Lamayuru and Hemis to Nubra and Tso Moriri, short village walks in Stok, Sang and Tar, the road into Zanskar and a winter search for the snow leopard in Hemis National Park.",
+    metaTitle: "Cultural, Spiritual & Wildlife Tours in Ladakh",
     metaDescription:
-      "Monastery visits, village homestays and spiritual retreats around Leh. Slow, respectful cultural journeys hosted by local Ladakhi families.",
-    keywords: ["Ladakh cultural tour", "Ladakh monastery tour", "Leh spiritual retreat", "Ladakh homestay"],
+      "Monastery retreats, Leh sightseeing, village walks in Stok, Sang and Tar, a Zanskar cultural tour and snow leopard expeditions in Hemis National Park, hosted by local Ladakhis.",
+    keywords: ["Ladakh cultural tour", "Ladakh monastery tour", "Ladakh spiritual retreat", "Ladakh sightseeing tour", "Zanskar cultural tour", "snow leopard tour Ladakh", "Ladakh village walk"],
   },
 ];
 
@@ -99,4 +99,9 @@ export function tripPath(trip: Trip) {
 
 export function formatPrice(price: number) {
   return price.toLocaleString("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 });
+}
+
+/** "10 people" reads as a maximum; a range like "3–5 people" is shown as is. */
+export function formatGroupSize(size: string) {
+  return /\d\s*[–-]\s*\d/.test(size) ? size : `Up to ${size}`;
 }

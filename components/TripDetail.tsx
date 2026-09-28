@@ -3,11 +3,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import CtaBand from "@/components/CtaBand";
+import ElevationProfile from "@/components/ElevationProfile";
 import JsonLd from "@/components/JsonLd";
 import { Breadcrumbs } from "@/components/PageHeader";
 import TripCard from "@/components/TripCard";
 import { CheckIcon, ClockIcon, CrossIcon, GaugeIcon, GroupIcon, WhatsAppIcon } from "@/components/Icons";
-import { CONTACT, formatPrice, getActivity, openGraphFor, SITE_NAME, SITE_URL, tripPath, tripsFor } from "@/lib/activities";
+import { CONTACT, formatGroupSize, formatPrice, getActivity, openGraphFor, SITE_NAME, SITE_URL, tripPath, tripsFor } from "@/lib/activities";
 import type { ActivityType, Trip } from "@/lib/trips";
 
 function findTrip(type: ActivityType, slug: string) {
@@ -47,7 +48,7 @@ export default async function TripDetail({ type, params }: { type: ActivityType;
   const facts = [
     { icon: <ClockIcon />, label: "Duration", value: trip.duration },
     { icon: <GaugeIcon />, label: "Difficulty", value: trip.difficulty },
-    { icon: <GroupIcon />, label: "Group size", value: `Up to ${trip.groupSize}` },
+    { icon: <GroupIcon />, label: "Group size", value: formatGroupSize(trip.groupSize) },
   ];
 
   return (
@@ -71,6 +72,13 @@ export default async function TripDetail({ type, params }: { type: ActivityType;
             <p className="trip-lede">{trip.description}</p>
           </section>
 
+          {trip.elevationProfile && (
+            <section aria-labelledby="elevation">
+              <h2 id="elevation">Elevation &amp; distance</h2>
+              <ElevationProfile points={trip.elevationProfile} days={trip.itinerary} />
+            </section>
+          )}
+
           <section aria-labelledby="itinerary">
             <h2 id="itinerary">Day-by-day itinerary</h2>
             <ol className="timeline">
@@ -78,6 +86,13 @@ export default async function TripDetail({ type, params }: { type: ActivityType;
                 <li key={d.day}>
                   <span className="timeline-day">{d.day}</span>
                   <h3>{d.title}</h3>
+                  {d.distanceKm !== undefined && (
+                    <p className="timeline-stats">
+                      <span>{d.distanceKm} km</span>
+                      {d.hours && <span>{d.hours}</span>}
+                      {d.gainM !== undefined && d.lossM !== undefined && <span>+{d.gainM} m / −{d.lossM} m</span>}
+                    </p>
+                  )}
                   <p>{d.details}</p>
                 </li>
               ))}

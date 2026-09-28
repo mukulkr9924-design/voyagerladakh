@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowIcon, ClockIcon, GroupIcon } from "@/components/Icons";
-import { formatPrice, tripPath } from "@/lib/activities";
+import { formatGroupSize, formatPrice, tripPath } from "@/lib/activities";
 import type { Trip } from "@/lib/trips";
 
 export default function TripCard({ trip, headingLevel = "h3" }: { trip: Trip; headingLevel?: "h2" | "h3" }) {
@@ -24,7 +24,7 @@ export default function TripCard({ trip, headingLevel = "h3" }: { trip: Trip; he
         <p className="trip-card-desc">{trip.description}</p>
         <ul className="trip-card-meta">
           <li><ClockIcon />{trip.duration}</li>
-          <li><GroupIcon />Up to {trip.groupSize}</li>
+          <li><GroupIcon />{formatGroupSize(trip.groupSize)}</li>
         </ul>
         <div className="trip-card-foot">
           <p className="trip-card-price">

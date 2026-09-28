@@ -1317,6 +1317,308 @@ p {
   color: var(--muted);
 }
 
+.timeline .timeline-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--sage-dark);
+}
+
+/* ============ Elevation profile ============ */
+.elev {
+  padding: clamp(16px, 3vw, 28px);
+  border-radius: var(--radius);
+  background: var(--background);
+}
+
+.elev-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.elev-tabs button {
+  padding: 7px 16px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--paper);
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s var(--ease), color 0.2s var(--ease), border-color 0.2s var(--ease);
+}
+
+.elev-tabs button:hover {
+  border-color: var(--sage);
+}
+
+.elev-tabs button[aria-pressed="true"] {
+  background: var(--foreground);
+  border-color: var(--foreground);
+  color: var(--paper);
+}
+
+.elev-stats {
+  display: grid;
+  grid-template-columns: repeat(4, auto);
+  justify-content: space-between;
+  gap: 16px 24px;
+  margin: 0 0 16px;
+}
+
+.elev-stats dt {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.elev-stats dd {
+  margin: 2px 0 0;
+  font-family: var(--font-heading);
+  font-size: clamp(19px, 2vw, 24px);
+  line-height: 1.25;
+  color: var(--foreground);
+  font-variant-numeric: tabular-nums;
+}
+
+.elev-stats dd span {
+  white-space: nowrap;
+}
+
+.elev-stats dd small {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.elev-plot {
+  position: relative;
+  touch-action: pan-y;
+}
+
+.elev-plot svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  cursor: crosshair;
+}
+
+.elev-plot svg:focus-visible {
+  outline-offset: 4px;
+}
+
+.elev-band {
+  fill: transparent;
+  cursor: pointer;
+  transition: fill 0.2s var(--ease);
+}
+
+.elev-band.odd {
+  fill: rgba(24, 56, 43, 0.03);
+}
+
+.elev-band.active {
+  fill: rgba(152, 168, 105, 0.16);
+}
+
+.elev-daylabel {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  fill: var(--accent-ink);
+  pointer-events: none;
+}
+
+.elev-divider {
+  stroke: var(--line);
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+  pointer-events: none;
+}
+
+.elev-grid {
+  stroke: var(--line);
+  stroke-width: 1;
+  pointer-events: none;
+}
+
+.elev-axis {
+  font-size: 12px;
+  fill: var(--muted);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+
+.elev-line {
+  fill: none;
+  stroke: var(--sage-dark);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+.elev-wp {
+  pointer-events: none;
+}
+
+.elev-mk-village {
+  fill: var(--paper);
+  stroke: var(--sage-dark);
+  stroke-width: 2;
+}
+
+.elev-mk-camp {
+  fill: var(--sage-dark);
+  stroke: var(--paper);
+  stroke-width: 1.5;
+}
+
+.elev-mk-pass {
+  fill: var(--sand);
+  stroke: var(--paper);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.elev-wplabel {
+  font-size: 12px;
+  font-weight: 600;
+  fill: var(--text);
+  paint-order: stroke;
+  stroke: var(--background);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+}
+
+.elev-cross {
+  stroke: var(--foreground);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+
+.elev-dot {
+  fill: var(--sage-dark);
+  stroke: var(--paper);
+  stroke-width: 2;
+}
+
+.elev-tip {
+  position: absolute;
+  top: 0;
+  transform: translate(-50%, -100%);
+  display: flex;
+  flex-direction: column;
+  min-width: 140px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--forest-deep);
+  color: var(--paper);
+  font-size: 13px;
+  line-height: 1.4;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+  pointer-events: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.elev-tip strong {
+  font-size: 14px;
+}
+
+.elev-tip span {
+  opacity: 0.8;
+}
+
+.elev-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 20px;
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.elev-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.elev-legend .elev-note {
+  margin-left: auto;
+  font-style: italic;
+}
+
+.elev-table {
+  margin-top: 16px;
+  font-size: 14px;
+}
+
+.elev-table summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--accent-ink);
+}
+
+.elev-table table {
+  width: 100%;
+  margin-top: 12px;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.elev-table th,
+.elev-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  font-weight: 400;
+}
+
+.elev-table thead th {
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.elev-table td {
+  text-align: right;
+}
+
+@media (max-width: 640px) {
+  .elev-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    margin-inline: calc(-1 * clamp(16px, 3vw, 28px));
+    padding-inline: clamp(16px, 3vw, 28px);
+    scrollbar-width: none;
+  }
+
+  .elev-tabs button {
+    flex: none;
+  }
+
+  .elev-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    justify-content: stretch;
+  }
+
+  .elev-legend .elev-note {
+    margin-left: 0;
+  }
+}
+
 .trip-main .incl-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1886,7 +2188,7 @@ p {
   .contact-layout,
   .prose-split,
   .trip-layout {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .booking-card {

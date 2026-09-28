@@ -10,6 +10,20 @@ const nextConfig: NextConfig = {
     minimumCacheTTL: 60 * 60 * 24 * 30,
     remotePatterns: [{ protocol: "https", hostname: "images.unsplash.com", pathname: "/photo-*" }],
   },
+  async redirects() {
+    return [
+      {
+        source: "/trekking-hiking/markha-valley-spituk-trek",
+        destination: "/trekking-hiking/markha-valley-zingchen-trek",
+        permanent: true,
+      },
+      {
+        source: "/motorbike-touring/lehmotorbike-nubra-sky",
+        destination: "/motorbike-touring/leh-umling-la-manali-bike-trip",
+        permanent: true,
+      },
+    ];
+  },
   experimental: {
     optimizePackageImports: ["framer-motion", "gsap"],
   },
