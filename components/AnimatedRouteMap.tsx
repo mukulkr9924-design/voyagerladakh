@@ -1,90 +1,537 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { AnimatePresence, motion } from "framer-motion";
 
-gsap.registerPlugin(ScrollTrigger);
+type LabelSide = "top" | "bottom" | "left" | "right";
+
+type Stop = {
+  name: string;
+  x: number;
+  y: number;
+  label: LabelSide;
+  altitude: string;
+  tag: string;
+  tagline: string;
+  desc: string;
+  highlights: string[];
+};
+
+// Stylised positions on a 1000 x 600 canvas — roughly geographic, not to scale.
+const STOPS: Stop[] = [
+  {
+    name: "Kargil",
+    x: 95, y: 190, label: "bottom",
+    altitude: "2,676 m",
+    tag: "Gateway",
+    tagline: "Where the road from Kashmir meets Ladakh",
+    desc: "Apricot orchards line the Suru river in this old trading town — the western doorway to Ladakh and base for the Drass war memorial.",
+    highlights: ["Kargil War Memorial, Drass", "Suru Valley drive", "Hundarman heritage village"],
+  },
+  {
+    name: "Mulbek",
+    x: 190, y: 262, label: "bottom",
+    altitude: "3,304 m",
+    tag: "Heritage",
+    tagline: "The Maitreya carved in stone",
+    desc: "A towering Maitreya Buddha, carved into a single rock face centuries ago, watches over the highway beneath a cliff-top gompa.",
+    highlights: ["Mulbek Chamba rock statue", "Cliff-top Mulbek Gompa", "Namika La pass"],
+  },
+  {
+    name: "Lamayuru",
+    x: 300, y: 300, label: "bottom",
+    altitude: "3,510 m",
+    tag: "Monastery",
+    tagline: "Moonland and one of Ladakh's oldest gompas",
+    desc: "Eroded ochre badlands earn this valley its 'Moonland' name. Lamayuru monastery clings to the ridge above, a thousand years in the making.",
+    highlights: ["Lamayuru Monastery", "Moonland at golden hour", "Fotu La — highest point on the Srinagar–Leh road"],
+  },
+  {
+    name: "Aryan Valley",
+    x: 335, y: 160, label: "top",
+    altitude: "≈2,900 m",
+    tag: "Culture",
+    tagline: "Land of the Brokpa",
+    desc: "Down the Indus lie Dha, Hanu and Garkone — villages of the Brokpa people, known for flower-crowned headdresses, orchards and a culture unlike anywhere else in Ladakh.",
+    highlights: ["Dha & Garkone villages", "Brokpa floral headdresses", "Apricot & walnut orchards"],
+  },
+  {
+    name: "Leh",
+    x: 478, y: 330, label: "bottom",
+    altitude: "3,500 m",
+    tag: "Base camp",
+    tagline: "The heart of Ladakh",
+    desc: "Acclimatise among whitewashed stupas, prayer flags and the old town bazaar. Every great Ladakh journey starts and ends here.",
+    highlights: ["Leh Palace & old town", "Sunset at Shanti Stupa", "Thiksey & Hemis monasteries"],
+  },
+  {
+    name: "Nubra Valley",
+    x: 525, y: 138, label: "top",
+    altitude: "3,048 m",
+    tag: "High pass",
+    tagline: "Sand dunes beyond Khardung La",
+    desc: "Crest one of the world's highest motorable passes and drop into a valley of sand dunes, double-humped camels and the Shyok river.",
+    highlights: ["Khardung La crossing", "Hunder dunes & Bactrian camels", "Diskit Monastery's giant Maitreya"],
+  },
+  {
+    name: "Pangong Lake",
+    x: 772, y: 250, label: "top",
+    altitude: "4,225 m",
+    tag: "Lake",
+    tagline: "The lake of a hundred blues",
+    desc: "A 134 km sliver of brackish water stretching into Tibet, shifting from turquoise to deep indigo as the light moves across it.",
+    highlights: ["Sunrise at Spangmik", "Lakeside camps at Merak", "Ever-changing colours"],
+  },
+  {
+    name: "Hanle",
+    x: 880, y: 500, label: "bottom",
+    altitude: "4,500 m",
+    tag: "Stargazing",
+    tagline: "India's first Dark Sky Reserve",
+    desc: "On the remote Changthang plateau, the night sky is so clear that India built an astronomical observatory here. The Milky Way is the main event.",
+    highlights: ["Milky Way stargazing", "Indian Astronomical Observatory", "17th-century Hanle Monastery"],
+  },
+  {
+    name: "Tso Moriri",
+    x: 628, y: 470, label: "left",
+    altitude: "4,522 m",
+    tag: "Wildlife",
+    tagline: "The quiet lake of Changthang",
+    desc: "A protected wetland ringed by snow peaks, home to nomadic Changpa herders, bar-headed geese and wild kiang roaming its shores.",
+    highlights: ["Korzok village & monastery", "Bar-headed geese & kiang", "Changpa nomad camps"],
+  },
+];
+
+// Signed bend per road segment: how far the curve bows away from a straight line.
+const BENDS = [0.18, -0.22, 0.28, 0.22, -0.3, 0.2, -0.16, 0.22];
+
+type Pt = { x: number; y: number };
+
+function controlPoint(a: Pt, b: Pt, bend: number): Pt {
+  return {
+    x: (a.x + b.x) / 2 - bend * (b.y - a.y),
+    y: (a.y + b.y) / 2 + bend * (b.x - a.x),
+  };
+}
+
+function pointOnSegment(i: number, t: number): Pt {
+  const a = STOPS[i];
+  const b = STOPS[i + 1];
+  const c = controlPoint(a, b, BENDS[i]);
+  const u = 1 - t;
+  return {
+    x: u * u * a.x + 2 * u * t * c.x + t * t * b.x,
+    y: u * u * a.y + 2 * u * t * c.y + t * t * b.y,
+  };
+}
+
+const SEGMENTS = STOPS.slice(0, -1).map((a, i) => {
+  const b = STOPS[i + 1];
+  const c = controlPoint(a, b, BENDS[i]);
+  return `M${a.x} ${a.y} Q${c.x.toFixed(1)} ${c.y.toFixed(1)} ${b.x} ${b.y}`;
+});
+
+const ROUTE_D = SEGMENTS.map((d, i) => (i === 0 ? d : d.replace(/^M[^Q]+/, ""))).join(" ");
+
+const PASSES = [
+  { name: "Namika La", ...pointOnSegment(1, 0.35) },
+  { name: "Fotu La", ...pointOnSegment(1, 0.78) },
+  { name: "Khardung La", ...pointOnSegment(4, 0.5) },
+];
+
+// Deterministic contour rings around a few massifs for a topographic feel.
+function contourRings(cx: number, cy: number, r: number, seed: number, rings: number) {
+  const paths: string[] = [];
+  for (let k = 0; k < rings; k++) {
+    const rk = r * (1 - k / (rings + 0.6));
+    const pts: Pt[] = [];
+    for (let s = 0; s < 36; s++) {
+      const th = (s / 36) * Math.PI * 2;
+      const wobble = 1 + 0.16 * Math.sin(3 * th + seed) + 0.09 * Math.sin(5 * th + seed * 2.3 + k);
+      pts.push({ x: cx + Math.cos(th) * rk * 1.5 * wobble, y: cy + Math.sin(th) * rk * wobble });
+    }
+    const mid = (p: Pt, q: Pt) => `${((p.x + q.x) / 2).toFixed(1)} ${((p.y + q.y) / 2).toFixed(1)}`;
+    let d = `M${mid(pts[35], pts[0])}`;
+    pts.forEach((p, i) => {
+      d += ` Q${p.x.toFixed(1)} ${p.y.toFixed(1)} ${mid(p, pts[(i + 1) % 36])}`;
+    });
+    paths.push(d + "Z");
+  }
+  return paths;
+}
+
+const CONTOURS = [
+  contourRings(260, 40, 70, 1, 5),
+  contourRings(640, 30, 80, 2.4, 6),
+  contourRings(900, 90, 60, 4.1, 4),
+  contourRings(430, 230, 42, 0.7, 4),
+  contourRings(210, 470, 80, 3.3, 6),
+  contourRings(430, 520, 55, 5.2, 4),
+  contourRings(790, 400, 50, 1.9, 4),
+].flat();
+
+const STARS = [
+  [835, 450, 1.4], [905, 438, 1], [940, 470, 1.6], [860, 560, 1.1], [955, 540, 1.3],
+  [915, 585, 0.9], [820, 520, 1], [970, 425, 1.2],
+] as const;
+
+const AUTOPLAY_MS = 4800;
+
+function labelProps(side: LabelSide) {
+  switch (side) {
+    case "top": return { x: 0, y: -26, textAnchor: "middle" as const };
+    case "bottom": return { x: 0, y: 38, textAnchor: "middle" as const };
+    case "left": return { x: -24, y: 6, textAnchor: "end" as const };
+    case "right": return { x: 24, y: 6, textAnchor: "start" as const };
+  }
+}
 
 export default function AnimatedRouteMap() {
-  const svgRef = useRef<SVGSVGElement>(null);
-  const pathRef = useRef<SVGPathElement>(null);
-  const waypointsRef = useRef<SVGCircleElement[]>([]);
+  const sectionRef = useRef<HTMLElement>(null);
+  const baseRef = useRef<SVGPathElement>(null);
+  const progressRef = useRef<SVGPathElement>(null);
+  const travelerRef = useRef<SVGGElement>(null);
+  const segmentRefs = useRef<(SVGPathElement | null)[]>([]);
+  const stopLengths = useRef<number[]>([]);
+  const travel = useRef({ len: 0 });
+  const tweenRef = useRef<gsap.core.Tween | null>(null);
+  const railRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const path = pathRef.current;
-    const waypoints = waypointsRef.current;
-    if (!path || !svgRef.current) return;
+  const [revealed, setRevealed] = useState(false);
+  const [ready, setReady] = useState(false);
+  const [active, setActive] = useState(0);
+  const [hovered, setHovered] = useState<number | null>(null);
+  const [autoplay, setAutoplay] = useState(true);
+  const [reducedMotion, setReducedMotion] = useState(false);
 
-    const pathLength = path.getTotalLength();
-    
-    // Set initial state
-    gsap.set(path, { strokeDasharray: pathLength, strokeDashoffset: pathLength });
-    gsap.set(waypoints, { scale: 0, transformOrigin: "center" });
+  const stop = STOPS[active];
 
-    // Animate path drawing
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: svgRef.current,
-        start: "top 80%",
-        end: "bottom 20%",
-        scrub: 1,
-        onEnter: () => tl.play(),
-        onLeaveBack: () => tl.reverse(),
-      }
-    });
-
-    tl.to(path, {
-      strokeDashoffset: 0,
-      duration: 2,
-      ease: "power2.inOut"
-    })
-    .to(waypoints, {
-      scale: 1,
-      stagger: 0.15,
-      duration: 0.4,
-      ease: "back.out(1.7)"
-    }, "-=1.5");
-
-    // Pulse animation for waypoints
-    waypoints.forEach((wp, i) => {
-      gsap.to(wp, {
-        scale: 1.3,
-        opacity: 0.5,
-        duration: 1.5,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-        delay: i * 0.3
-      });
-    });
-
-    return () => {
-      ScrollTrigger.getAll().forEach(t => t.kill());
-      gsap.killTweensOf([path, ...waypoints]);
-    };
+  const placeTraveler = useCallback((len: number) => {
+    const progress = progressRef.current;
+    const traveler = travelerRef.current;
+    if (!progress || !traveler) return;
+    const total = progress.getTotalLength();
+    const p = progress.getPointAtLength(len);
+    traveler.setAttribute("transform", `translate(${p.x} ${p.y})`);
+    progress.style.strokeDashoffset = String(total - len);
   }, []);
 
+  // Measure the road and prepare the draw-on animation.
+  useEffect(() => {
+    const base = baseRef.current;
+    const progress = progressRef.current;
+    if (!base || !progress) return;
+
+    setReducedMotion(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+
+    let acc = 0;
+    stopLengths.current = [0];
+    segmentRefs.current.forEach((seg) => {
+      acc += seg?.getTotalLength() ?? 0;
+      stopLengths.current.push(acc);
+    });
+
+    const total = progress.getTotalLength();
+    base.style.strokeDasharray = `${total}`;
+    base.style.strokeDashoffset = `${total}`;
+    progress.style.strokeDasharray = `${total}`;
+    placeTraveler(0);
+  }, [placeTraveler]);
+
+  // Reveal once the map scrolls into view.
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setRevealed(true);
+          io.disconnect();
+        }
+      },
+      { threshold: 0.3 }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!revealed || !baseRef.current) return;
+    const tween = gsap.to(baseRef.current, {
+      strokeDashoffset: 0,
+      duration: reducedMotion ? 0 : 2.4,
+      ease: "power2.inOut",
+      onComplete: () => setReady(true),
+    });
+    return () => {
+      tween.kill();
+    };
+  }, [revealed, reducedMotion]);
+
+  // Drive the traveller along the road to the active stop.
+  useEffect(() => {
+    if (!ready) return;
+    const target = stopLengths.current[active] ?? 0;
+    const distance = Math.abs(target - travel.current.len);
+    tweenRef.current?.kill();
+    tweenRef.current = gsap.to(travel.current, {
+      len: target,
+      duration: reducedMotion ? 0 : Math.min(2.2, Math.max(0.7, distance / 380)),
+      ease: "power2.inOut",
+      onUpdate: () => placeTraveler(travel.current.len),
+    });
+  }, [active, ready, reducedMotion, placeTraveler]);
+
+  // Keep the active chip visible when the rail scrolls horizontally (mobile).
+  useEffect(() => {
+    const rail = railRef.current;
+    const chip = rail?.children[active] as HTMLElement | undefined;
+    if (!rail || !chip || rail.scrollWidth <= rail.clientWidth) return;
+    rail.scrollTo({ left: chip.offsetLeft - (rail.clientWidth - chip.offsetWidth) / 2, behavior: "smooth" });
+  }, [active]);
+
+  useEffect(() => () => {
+    tweenRef.current?.kill();
+  }, []);
+
+  // Guided tour until the visitor takes over.
+  useEffect(() => {
+    if (!ready || !autoplay || reducedMotion) return;
+    const id = window.setTimeout(() => setActive((i) => (i + 1) % STOPS.length), AUTOPLAY_MS);
+    return () => window.clearTimeout(id);
+  }, [ready, autoplay, reducedMotion, active]);
+
+  const select = (i: number) => {
+    setAutoplay(false);
+    setActive((i + STOPS.length) % STOPS.length);
+  };
+
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+      e.preventDefault();
+      select(active + 1);
+    } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+      e.preventDefault();
+      select(active - 1);
+    }
+  };
+
+  const tourProgress = useMemo(() => ((active + 1) / STOPS.length) * 100, [active]);
+
   return (
-    <section className="route-map-section">
-      <div className="section-heading centered">
+    <section ref={sectionRef} className="lmap-section" aria-labelledby="lmap-title">
+      <motion.div
+        className="section-heading centered lmap-heading"
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6 }}
+      >
         <span className="kicker">Route map</span>
-        <h2>Ladakh by trail</h2>
+        <h2 id="lmap-title">Nine places that define Ladakh</h2>
+        <p>From the apricot orchards of Kargil to the silent shores of Tso Moriri — tap any stop to travel there.</p>
+      </motion.div>
+
+      <div className={`lmap-shell${revealed ? " is-revealed" : ""}`} onKeyDown={onKeyDown}>
+        <div className="lmap-canvas">
+          <svg className="lmap-svg" viewBox="0 0 1000 600" role="group" aria-label="Illustrated map of major tourist stops in Ladakh">
+            <defs>
+              <radialGradient id="lmap-bg" cx="45%" cy="40%" r="80%">
+                <stop offset="0%" stopColor="#24473a" />
+                <stop offset="100%" stopColor="#11251c" />
+              </radialGradient>
+              <linearGradient id="lmap-lake" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stopColor="#7cc6d6" />
+                <stop offset="100%" stopColor="#2c7a9c" />
+              </linearGradient>
+              <filter id="lmap-glow" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="5" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
+
+            <rect width="1000" height="600" fill="url(#lmap-bg)" />
+
+            <g className="lmap-contours">
+              {CONTOURS.map((d, i) => <path key={i} d={d} />)}
+            </g>
+
+            <g className="lmap-ranges" aria-hidden="true">
+              <text x="620" y="42">KARAKORAM RANGE</text>
+              <text x="655" y="318" transform="rotate(-10 655 318)">LADAKH RANGE</text>
+              <text x="250" y="470" transform="rotate(-18 250 470)">ZANSKAR RANGE</text>
+              <text x="820" y="368">CHANGTHANG PLATEAU</text>
+            </g>
+
+            <g className="lmap-rivers" aria-hidden="true">
+              <path d="M1010 440 C930 450, 860 420, 780 410 S620 385, 545 355 S430 345, 380 300 S330 230, 345 170 S260 95, 160 45 S70 0, 20 -20" />
+              <path d="M40 360 C70 300, 85 240, 95 190 S140 100, 175 60" />
+              <path d="M720 270 C700 200, 660 160, 600 152 S480 128, 410 95 S300 40, 240 -10" />
+              <text x="585" y="376" transform="rotate(12 585 376)">Indus</text>
+              <text x="628" y="148" transform="rotate(8 628 148)">Shyok</text>
+            </g>
+
+            <g aria-hidden="true">
+              <path className="lmap-lake" d="M752 272 C770 255, 800 262, 830 248 S880 222, 920 212 S980 186, 1010 178 L1010 198 C980 207, 940 224, 900 238 S840 264, 810 274 S765 292, 752 272 Z" />
+              <ellipse className="lmap-lake" cx="655" cy="498" rx="15" ry="38" transform="rotate(-12 655 498)" />
+              <g className="lmap-dunes">
+                <path d="M548 168 q10 -8 20 0 t20 0" />
+                <path d="M560 180 q10 -8 20 0 t20 0" />
+                <path d="M538 190 q8 -6 16 0 t16 0" />
+              </g>
+              <g className="lmap-stars">
+                {STARS.map(([x, y, r], i) => (
+                  <circle key={i} cx={x} cy={y} r={r} style={{ animationDelay: `${i * 0.45}s` }} />
+                ))}
+              </g>
+            </g>
+
+            {SEGMENTS.map((d, i) => (
+              <path key={i} ref={(el) => { segmentRefs.current[i] = el; }} d={d} fill="none" stroke="none" />
+            ))}
+
+            <path ref={baseRef} className="lmap-road" d={ROUTE_D} />
+            <path ref={progressRef} className="lmap-road-progress" d={ROUTE_D} filter="url(#lmap-glow)" />
+
+            <g className="lmap-passes" aria-hidden="true">
+              {PASSES.map((p) => (
+                <g key={p.name} transform={`translate(${p.x.toFixed(1)} ${p.y.toFixed(1)})`}>
+                  <path d="M-6 4 L0 -6 L6 4 Z" />
+                  <text x="9" y="-6">{p.name}</text>
+                </g>
+              ))}
+            </g>
+
+            {STOPS.map((s, i) => {
+              const lp = labelProps(s.label);
+              const isActive = i === active;
+              const visited = ready && i <= active;
+              return (
+                <g
+                  key={s.name}
+                  transform={`translate(${s.x} ${s.y})`}
+                  className={`lmap-stop${isActive ? " is-active" : ""}${visited ? " is-visited" : ""}${hovered === i ? " is-hovered" : ""}`}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`${i + 1}. ${s.name}, ${s.altitude}`}
+                  aria-pressed={isActive}
+                  onClick={() => select(i)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      select(i);
+                    }
+                  }}
+                  onMouseEnter={() => setHovered(i)}
+                  onMouseLeave={() => setHovered(null)}
+                  onFocus={() => setHovered(i)}
+                  onBlur={() => setHovered(null)}
+                >
+                  <g className="lmap-stop-inner" style={{ transitionDelay: revealed && !ready ? `${0.4 + i * 0.2}s` : "0s" }}>
+                    <g className="lmap-marker">
+                      <circle className="lmap-hit" r="30" />
+                      {isActive && <circle className="lmap-pulse" r="14" />}
+                      <circle className="lmap-dot" r="14" />
+                      <text className="lmap-num" y="5">{i + 1}</text>
+                    </g>
+                    <text className="lmap-label" x={lp.x} y={lp.y} textAnchor={lp.textAnchor}>{s.name}</text>
+                  </g>
+                </g>
+              );
+            })}
+
+            <g ref={travelerRef} className={`lmap-traveler${ready ? " is-ready" : ""}`} aria-hidden="true">
+              <g className="lmap-traveler-body">
+                <circle r="22" className="lmap-traveler-halo" />
+                <circle r="7" className="lmap-traveler-core" />
+              </g>
+            </g>
+
+            <g className="lmap-compass" transform="translate(950 540)" aria-hidden="true">
+              <circle r="24" />
+              <path d="M0 -20 L6 0 L0 20 L-6 0 Z" />
+              <path d="M0 -20 L6 0 L-6 0 Z" className="north" />
+              <text y="-30">N</text>
+            </g>
+            <text className="lmap-note" x="24" y="584">Illustrative map · not to scale</text>
+          </svg>
+
+          <button
+            type="button"
+            className="lmap-play"
+            onClick={() => setAutoplay((v) => !v)}
+            aria-label={autoplay ? "Pause guided tour" : "Play guided tour"}
+          >
+            {autoplay ? (
+              <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="2" width="3.5" height="12" rx="1" /><rect x="9.5" y="2" width="3.5" height="12" rx="1" /></svg>
+            ) : (
+              <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.5v11l9.5-5.5z" /></svg>
+            )}
+            <span>{autoplay ? "Touring" : "Tour"}</span>
+          </button>
+        </div>
+
+        <aside className="lmap-panel" aria-live="polite">
+          <div className="lmap-panel-top">
+            <span className="lmap-count">
+              {String(active + 1).padStart(2, "0")}
+              <small> / {String(STOPS.length).padStart(2, "0")}</small>
+            </span>
+            <span className="lmap-tag">{stop.tag}</span>
+          </div>
+          <div className="lmap-bar"><span style={{ width: `${tourProgress}%` }} /></div>
+
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={stop.name}
+              className="lmap-panel-body"
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.35, ease: "easeOut" }}
+            >
+              <h3>{stop.name}</h3>
+              <p className="lmap-alt">
+                <svg viewBox="0 0 20 14" aria-hidden="true"><path d="M0 14 L7 3 L10 7 L13 1 L20 14 Z" /></svg>
+                {stop.altitude}
+              </p>
+              <p className="lmap-tagline">{stop.tagline}</p>
+              <p className="lmap-desc">{stop.desc}</p>
+              <ul className="lmap-highlights">
+                {stop.highlights.map((h) => <li key={h}>{h}</li>)}
+              </ul>
+            </motion.div>
+          </AnimatePresence>
+
+          <div className="lmap-controls">
+            <button type="button" onClick={() => select(active - 1)} aria-label="Previous stop">←</button>
+            <button type="button" onClick={() => select(active + 1)} aria-label="Next stop">→</button>
+            <Link href="/plan-your-trip" className="lmap-cta">Plan this route</Link>
+          </div>
+        </aside>
       </div>
-      <div className="route-map-wrap">
-        <svg ref={svgRef} className="route-map" viewBox="0 0 800 420" fill="none">
-          <path className="route-shadow" d="M100 250 C160 180, 180 210, 230 170 S270 190, 300 140 S340 180, 390 160 S430 170, 470 150 S530 110, 570 130 S620 170, 650 160" />
-          <path 
-            ref={pathRef}
-            className="route-line" 
-            d="M100 250 C160 180, 180 210, 230 170 S270 190, 300 140 S340 180, 390 160 S430 170, 470 150 S530 110, 570 130 S620 170, 650 160" 
-          />
-          <circle ref={(el) => { if (el) waypointsRef.current.push(el); }} className="waypoint" cx="100" cy="250" r="6" />
-          <circle ref={(el) => { if (el) waypointsRef.current.push(el); }} className="waypoint" cx="230" cy="170" r="6" />
-          <circle ref={(el) => { if (el) waypointsRef.current.push(el); }} className="waypoint" cx="390" cy="160" r="6" />
-          <circle ref={(el) => { if (el) waypointsRef.current.push(el); }} className="waypoint" cx="570" cy="130" r="6" />
-          <circle ref={(el) => { if (el) waypointsRef.current.push(el); }} className="waypoint" cx="650" cy="160" r="6" />
-        </svg>
+
+      <div ref={railRef} className="lmap-rail" role="tablist" aria-label="Ladakh stops">
+        {STOPS.map((s, i) => (
+          <button
+            key={s.name}
+            type="button"
+            role="tab"
+            aria-selected={i === active}
+            className={`lmap-chip${i === active ? " is-active" : ""}${ready && i < active ? " is-visited" : ""}`}
+            onClick={() => select(i)}
+            onMouseEnter={() => setHovered(i)}
+            onMouseLeave={() => setHovered(null)}
+          >
+            <span>{i + 1}</span>
+            {s.name}
+          </button>
+        ))}
       </div>
     </section>
   );

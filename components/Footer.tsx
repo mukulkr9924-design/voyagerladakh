@@ -1,64 +1,59 @@
-"use client";
-
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { InstagramIcon, MailIcon, PhoneIcon, PinIcon, WhatsAppIcon } from "@/components/Icons";
+import { activities, CONTACT } from "@/lib/activities";
 
 export default function Footer() {
   return (
     <footer className="footer">
       <div className="footer-inner">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-        >
-          <div className="brand small">Voyager Ladakh</div>
-          <p>Leh, Ladakh</p>
-        </motion.div>
-        <motion.div
-          className="footer-links"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-        >
-          {[
-            { label: "Trekking & Hiking", href: "/trekking-hiking" },
-            { label: "Mountaineering", href: "/mountaineering" },
-            { label: "Motorbike Touring", href: "/motorbike-touring" },
-            { label: "Soul of Ladakh", href: "/soul-of-ladakh" },
-            { label: "Plan your trip", href: "/plan-your-trip" },
-            { label: "Contact", href: "/contact" },
-          ].map((item, i) => (
-            <motion.div
-              key={item.href}
-              whileHover={{ x: 4, color: "var(--sage)" }}
-              whileTap={{ scale: 0.95 }}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: i * 0.05 }}
-            >
-              <Link href={item.href}>{item.label}</Link>
-            </motion.div>
-          ))}
-        </motion.div>
+        <div className="footer-brand">
+          <p className="footer-logo">Voyager Ladakh</p>
+          <p>
+            A Leh-based local team planning treks, climbs, rides and cultural journeys across Ladakh, with
+            guides, hosts and drivers from the valleys we travel through.
+          </p>
+          <div className="footer-social">
+            <a href={CONTACT.instagram} target="_blank" rel="noopener noreferrer" aria-label="Voyager Ladakh on Instagram">
+              <InstagramIcon />
+            </a>
+            <a href={CONTACT.whatsapp} target="_blank" rel="noopener noreferrer" aria-label="Chat on WhatsApp">
+              <WhatsAppIcon />
+            </a>
+            <a href={`mailto:${CONTACT.email}`} aria-label="Email Voyager Ladakh">
+              <MailIcon />
+            </a>
+          </div>
+        </div>
+
+        <nav className="footer-col" aria-label="Journeys">
+          <p className="footer-heading">Journeys</p>
+          <ul>
+            {activities.map((a) => (
+              <li key={a.type}><Link href={`/${a.type}`}>{a.name}</Link></li>
+            ))}
+          </ul>
+        </nav>
+
+        <nav className="footer-col" aria-label="Company">
+          <p className="footer-heading">Company</p>
+          <ul>
+            <li><Link href="/about">About us</Link></li>
+            <li><Link href="/plan-your-trip">Plan your trip</Link></li>
+            <li><Link href="/contact">Contact</Link></li>
+          </ul>
+        </nav>
+
+        <address className="footer-col footer-contact">
+          <p className="footer-heading">Visit us</p>
+          <p><PinIcon />{CONTACT.address[0]}<br />{CONTACT.address[1]}</p>
+          <p><PhoneIcon /><a href={CONTACT.phoneHref}>{CONTACT.phone}</a></p>
+          <p><MailIcon /><a href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a></p>
+        </address>
       </div>
-      <div className="footer-container">
-        <motion.div
-          className="footer-bottom"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-        >
-          <div className="footer-bottom-left">
-            <p>© 2026 Voyager Ladakh. All rights reserved.</p>
-          </div>
-          <div className="footer-bottom-right">
-            <p>Developed by <a href="https://mukulkumar.dev" target="_blank" rel="noopener noreferrer">mukulkumar.dev</a></p>
-          </div>
-        </motion.div>
+
+      <div className="footer-bottom">
+        <p>© {new Date().getFullYear()} Voyager Ladakh. All rights reserved.</p>
+        <p>Developed by <a href="https://mukulkumar.dev" target="_blank" rel="noopener noreferrer">mukulkumar.dev</a></p>
       </div>
     </footer>
   );

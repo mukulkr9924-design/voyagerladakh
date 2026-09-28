@@ -1,68 +1,39 @@
-"use client";
-
+import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { ArrowIcon, ClockIcon, GroupIcon } from "@/components/Icons";
+import { formatPrice, tripPath } from "@/lib/activities";
 import type { Trip } from "@/lib/trips";
 
-export default function TripCard({ trip }: { trip: Trip }) {
+export default function TripCard({ trip, headingLevel = "h3" }: { trip: Trip; headingLevel?: "h2" | "h3" }) {
+  const Heading = headingLevel;
   return (
-    <motion.article
-      className="trip-card"
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
-      whileHover={{ y: -8, boxShadow: "0 20px 40px rgba(0,0,0,0.12)" }}
-    >
-      <div className="trip-image-wrap">
-        <motion.img
+    <article className="trip-card reveal">
+      <div className="trip-card-media">
+        <Image
           src={trip.images[0]}
-          alt={trip.title}
-          className="trip-image"
-          initial={{ scale: 1.1 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          whileHover={{ scale: 1.08 }}
+          alt=""
+          fill
+          sizes="(max-width: 700px) 100vw, (max-width: 1100px) 50vw, 420px"
         />
-        <motion.span
-          className="trip-overlay"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-        >
-          <Link href={`/${trip.activityType}/${trip.slug}`}>View trip</Link>
-        </motion.span>
+        <span className={`badge badge-${trip.difficulty.toLowerCase()}`}>{trip.difficulty}</span>
       </div>
-      <div className="trip-content">
-        <div className="trip-meta">
-          <span>{trip.duration}</span>
-          <span>{trip.difficulty}</span>
+      <div className="trip-card-body">
+        <Heading className="trip-card-title">
+          <Link href={tripPath(trip)} className="stretched-link">{trip.title}</Link>
+        </Heading>
+        <p className="trip-card-desc">{trip.description}</p>
+        <ul className="trip-card-meta">
+          <li><ClockIcon />{trip.duration}</li>
+          <li><GroupIcon />Up to {trip.groupSize}</li>
+        </ul>
+        <div className="trip-card-foot">
+          <p className="trip-card-price">
+            <small>From</small>
+            {formatPrice(trip.price)}
+          </p>
+          <span className="trip-card-go" aria-hidden="true"><ArrowIcon /></span>
         </div>
-        <motion.h3
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          {trip.title}
-        </motion.h3>
-        <motion.p
-          className="trip-description"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25 }}
-        >
-          {trip.description}
-        </motion.p>
-        <motion.div
-          className="trip-details"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-        >
-          <span>{trip.price.toLocaleString("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 })}</span>
-          <span>{trip.groupSize}</span>
-        </motion.div>
       </div>
-    </motion.article>
+    </article>
   );
 }

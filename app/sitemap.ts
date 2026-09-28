@@ -1,67 +1,22 @@
-import { MetadataRoute } from "next";
+import type { MetadataRoute } from "next";
+import { activities, SITE_URL, tripPath } from "@/lib/activities";
 import { trips } from "@/lib/trips";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://voyagerladakh.com";
+  const page = (path: string, priority: number): MetadataRoute.Sitemap[number] => ({
+    url: `${SITE_URL}${path}`,
+    priority,
+  });
 
-  const staticPages: MetadataRoute.Sitemap = [
-    {
-      url: baseUrl,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 1,
-    },
-    {
-      url: `${baseUrl}/about`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/contact`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/trekking-hiking`,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/motorbike-touring`,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/soul-of-ladakh`,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/mountaineering`,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/plan-your-trip`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
+  return [
+    page("", 1),
+    ...activities.map((a) => page(`/${a.type}`, 0.9)),
+    ...trips.map((t) => ({
+      ...page(tripPath(t), 0.8),
+      images: t.images.slice(0, 1),
+    })),
+    page("/plan-your-trip", 0.7),
+    page("/about", 0.6),
+    page("/contact", 0.6),
   ];
-
-  // Add trip detail pages
-  const tripPages: MetadataRoute.Sitemap = trips.map((trip) => ({
-    url: `${baseUrl}/${trip.activityType}/${trip.slug}`,
-    lastModified: new Date(),
-    changeFrequency: "monthly" as const,
-    priority: 0.7,
-  }));
-
-  return [...staticPages, ...tripPages];
 }

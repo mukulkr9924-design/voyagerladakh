@@ -1,36 +1,34 @@
-export default function StructuredData() {
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "TravelAgency",
-    "name": "Voyager Ladakh",
-    "description": "Leh-based adventure planning for trekking, biking, spiritual and cultural journeys across Ladakh",
-    "url": "https://voyagerladakh.com",
-    "telephone": "+91 9541379356",
-    "email": "contact@voyagerladakh.com",
-    "address": {
-      "@type": "PostalAddress",
-      "streetAddress": "Near Akama Restaurant, Zumpa Choglamsar",
-      "addressLocality": "Leh",
-      "addressRegion": "Ladakh",
-      "postalCode": "194104",
-      "addressCountry": "IN"
-    },
-    "geo": {
-      "@type": "GeoCoordinates",
-      "latitude": "34.1526",
-      "longitude": "77.5770"
-    },
-    "sameAs": [
-      "https://www.instagram.com/8_wonders_itself/"
-    ],
-    "priceRange": "₹₹",
-    "openingHours": "Mo-Su 09:00-18:00"
-  };
+import JsonLd from "@/components/JsonLd";
+import { CONTACT, SITE_NAME, SITE_URL } from "@/lib/activities";
 
+export default function StructuredData() {
   return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+    <JsonLd
+      data={{
+        "@context": "https://schema.org",
+        "@type": "TravelAgency",
+        "@id": `${SITE_URL}/#organization`,
+        name: SITE_NAME,
+        description: "Leh-based adventure planning for trekking, mountaineering, motorbike touring and cultural journeys across Ladakh",
+        url: SITE_URL,
+        logo: `${SITE_URL}/voyager-logo.jpg`,
+        image: `${SITE_URL}/opengraph-image`,
+        telephone: CONTACT.phone,
+        email: CONTACT.email,
+        address: {
+          "@type": "PostalAddress",
+          streetAddress: "Near Akama Restaurant, Zumpa Choglamsar",
+          addressLocality: "Leh",
+          addressRegion: "Ladakh",
+          postalCode: "194104",
+          addressCountry: "IN",
+        },
+        geo: { "@type": "GeoCoordinates", latitude: 34.1526, longitude: 77.577 },
+        areaServed: { "@type": "Place", name: "Ladakh, India" },
+        sameAs: [CONTACT.instagram],
+        priceRange: "₹₹",
+        openingHours: "Mo-Su 09:00-18:00",
+      }}
     />
   );
 }
