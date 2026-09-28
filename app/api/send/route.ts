@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
+import { clientIp, rateLimit } from "@/lib/rateLimit";
 
 const resend = new Resend(process.env.RESEND_KEY);
 const destinationEmail = "tsewangmessi10@gmail.com";
@@ -9,10 +10,28 @@ function escapeHtml(value: string) {
   return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\"/g, "&quot;").replace(/'/g, "&#039;");
 }
 
+// A real visitor needs a few seconds to fill in the form; bots post instantly.
+const MIN_FILL_MS = 3000;
+
 export async function POST(request: Request) {
+  const limit = rateLimit(`send:${clientIp(request)}`, 5, 10 * 60 * 1000);
+  if (!limit.ok) {
+    return NextResponse.json(
+      { success: false, error: "Too many messages. Please try again in a few minutes, or reach us on WhatsApp." },
+      { status: 429, headers: { "Retry-After": String(limit.retryAfter) } }
+    );
+  }
+
   try {
     const payload = await request.json();
     const type = payload?.type ?? "contact";
+
+    // Spam trap: bots fill the hidden "website" field or submit too fast.
+    // Pretend it worked so they don't adapt, but send nothing.
+    const elapsed = Number(payload?.elapsedMs);
+    if (String(payload?.website ?? "") !== "" || !Number.isFinite(elapsed) || elapsed < MIN_FILL_MS) {
+      return NextResponse.json({ success: true, id: null });
+    }
 
     const contactName = String(payload?.name ?? "").trim();
     const contactEmail = String(payload?.email ?? "").trim();

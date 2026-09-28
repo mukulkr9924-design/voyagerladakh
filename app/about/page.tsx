@@ -1,14 +1,18 @@
 import type { Metadata } from "next";
 import CtaBand from "@/components/CtaBand";
 import PageHeader from "@/components/PageHeader";
+import { openGraphFor, SITE_NAME } from "@/lib/activities";
+
+const title = "About Us – Leh-based Adventure Travel Team";
+const description =
+  "Voyager Ladakh is a Leh-based local team planning trekking, mountaineering, motorbike and cultural journeys across Ladakh with local guides and village hosts.";
 
 export const metadata: Metadata = {
-  title: "About Us – Leh-based Adventure Travel Team",
-  description:
-    "Voyager Ladakh is a Leh-based local team planning trekking, mountaineering, motorbike and cultural journeys across Ladakh with local guides and village hosts.",
+  title,
+  description,
   keywords: ["about Voyager Ladakh", "Ladakh tour operator", "sustainable tourism Ladakh", "local guides Leh"],
   alternates: { canonical: "/about" },
-  openGraph: { url: "/about" },
+  openGraph: openGraphFor("/about", `${title} | ${SITE_NAME}`, description),
 };
 
 const values = [

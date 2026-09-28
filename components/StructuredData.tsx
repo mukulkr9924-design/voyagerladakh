@@ -11,8 +11,8 @@ export default function StructuredData() {
         name: SITE_NAME,
         description: "Leh-based adventure planning for trekking, mountaineering, motorbike touring and cultural journeys across Ladakh",
         url: SITE_URL,
-        logo: `${SITE_URL}/voyager-logo.jpg`,
-        image: `${SITE_URL}/opengraph-image`,
+        logo: `${SITE_URL}/voyager-ladakh-app-icon-512.png`,
+        image: `${SITE_URL}/voyager-ladakh-horizontal.png`,
         telephone: CONTACT.phone,
         email: CONTACT.email,
         address: {

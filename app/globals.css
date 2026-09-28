@@ -250,21 +250,12 @@ p {
 .brand-link {
   display: flex;
   align-items: center;
-  gap: 10px;
   flex-shrink: 0;
 }
 
 .brand-logo {
-  width: 62px;
-  height: auto;
-  mix-blend-mode: multiply;
-}
-
-.brand-name {
-  font-family: var(--font-heading);
-  font-size: 21px;
-  letter-spacing: -0.02em;
-  color: var(--foreground);
+  width: auto;
+  height: 46px;
 }
 
 .main-nav {
@@ -489,6 +480,17 @@ p {
 
 .mobile-drawer.is-open {
   transform: none;
+}
+
+.drawer-logo {
+  position: absolute;
+  top: 12px;
+  left: 28px;
+}
+
+.drawer-logo img {
+  width: auto;
+  height: 40px;
 }
 
 .mobile-drawer ul {
@@ -955,6 +957,19 @@ p {
   background: var(--foreground);
   border-color: var(--foreground);
   color: var(--paper);
+}
+
+/* Reserves the route map's space until its code loads (see LazyRouteMap). */
+/* Heights measured from the rendered map: stacked layout grows with width, side-by-side is fixed. */
+.lmap-placeholder {
+  min-height: calc(60vw + 960px);
+  background: var(--background);
+}
+
+@media (min-width: 1081px) {
+  .lmap-placeholder {
+    min-height: 1060px;
+  }
 }
 
 /* ============ Reasons & FAQ ============ */
@@ -1528,6 +1543,14 @@ p {
   color: #a23c2c;
 }
 
+.hp-field {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
 .steps {
   display: grid;
   gap: 28px;
@@ -1643,7 +1666,8 @@ p {
 /* ============ Footer ============ */
 .footer {
   padding: clamp(56px, 7vw, 88px) var(--gutter) 28px;
-  background: var(--forest-deep);
+  /* Matches the dark logo's built-in #18382b background. */
+  background: var(--foreground);
   color: rgba(255, 254, 250, 0.72);
   font-size: 15px;
 }
@@ -1657,13 +1681,17 @@ p {
 }
 
 .footer-logo {
+  display: inline-block;
   margin: 0 0 14px;
-  font-family: var(--font-heading);
-  font-size: 28px;
-  color: var(--paper);
 }
 
-.footer-brand > p:not(.footer-logo) {
+.footer-logo img {
+  display: block;
+  width: auto;
+  height: 60px;
+}
+
+.footer-brand > p {
   max-width: 340px;
   margin: 0;
 }
@@ -1839,7 +1867,7 @@ p {
   }
 
   .brand-logo {
-    width: 50px;
+    height: 38px;
   }
 
   .hero-stats {
@@ -1876,10 +1904,6 @@ p {
 @media (max-width: 640px) {
   body {
     font-size: 16px;
-  }
-
-  .brand-name {
-    font-size: 18px;
   }
 
   .activity-grid,

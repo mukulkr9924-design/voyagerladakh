@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { InstagramIcon, MailIcon, PhoneIcon, PinIcon, WhatsAppIcon } from "@/components/Icons";
 import { activities, CONTACT } from "@/lib/activities";
@@ -7,7 +8,10 @@ export default function Footer() {
     <footer className="footer">
       <div className="footer-inner">
         <div className="footer-brand">
-          <p className="footer-logo">Voyager Ladakh</p>
+          {/* Dark variant: its built-in background matches the footer's forest green. */}
+          <Link href="/" className="footer-logo">
+            <Image src="/voyager-ladakh-horizontal-dark.svg" alt="Voyager Ladakh – home" width={467} height={140} />
+          </Link>
           <p>
             A Leh-based local team planning treks, climbs, rides and cultural journeys across Ladakh, with
             guides, hosts and drivers from the valleys we travel through.

@@ -4,6 +4,15 @@ import { trips } from "@/lib/trips";
 export const SITE_URL = "https://voyagerladakh.com";
 export const SITE_NAME = "Voyager Ladakh";
 
+// Share image for pages without their own trip photo.
+export const OG_FALLBACK_IMAGE = { url: "/voyager-ladakh-app-icon-512.png", width: 512, height: 512, alt: SITE_NAME };
+
+// Next merges metadata shallowly: a page's `openGraph` replaces the layout's entirely,
+// so every page builds its Open Graph block from this to keep the site name and image.
+export function openGraphFor(url: string, title: string, description: string, images: { url: string; width?: number; height?: number; alt?: string }[] = [OG_FALLBACK_IMAGE]) {
+  return { siteName: SITE_NAME, locale: "en_IN", type: "website" as const, url, title, description, images };
+}
+
 export const CONTACT = {
   phone: "+91 9541379356",
   phoneHref: "tel:+919541379356",

@@ -4,7 +4,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import FloatingWhatsApp from "@/components/FloatingWhatsApp";
 import StructuredData from "@/components/StructuredData";
-import { SITE_NAME, SITE_URL } from "@/lib/activities";
+import { openGraphFor, SITE_NAME, SITE_URL } from "@/lib/activities";
 import "./globals.css";
 
 const sans = Geist({
@@ -18,13 +18,15 @@ const display = Fraunces({
   axes: ["opsz", "SOFT"],
 });
 
+const defaultTitle = "Voyager Ladakh – Treks, Expeditions & Tours from Leh";
+
 const description =
   "Leh-based team planning guided treks, 6,000 m mountaineering expeditions, motorbike tours and cultural journeys across Ladakh — Markha Valley, Kang Yatse, Nubra, Pangong and more.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Voyager Ladakh – Treks, Expeditions & Tours from Leh",
+    default: defaultTitle,
     template: `%s | ${SITE_NAME}`,
   },
   description,
@@ -34,16 +36,14 @@ export const metadata: Metadata = {
   creator: SITE_NAME,
   publisher: SITE_NAME,
   formatDetection: { telephone: false },
-  openGraph: {
-    siteName: SITE_NAME,
-    title: "Voyager Ladakh – Treks, Expeditions & Tours from Leh",
-    description,
-    url: "/",
-    locale: "en_IN",
-    type: "website",
+  icons: {
+    icon: "/favicon-32.png",
+    apple: "/favicon-180.png",
   },
+  openGraph: openGraphFor("/", defaultTitle, description),
+  // The fallback share image is square; trip pages switch to a large card for their photos.
   twitter: {
-    card: "summary_large_image",
+    card: "summary",
   },
   robots: {
     index: true,

@@ -2,15 +2,18 @@ import type { Metadata } from "next";
 import EnquiryForm from "@/components/EnquiryForm";
 import { InstagramIcon, MailIcon, PhoneIcon, PinIcon, WhatsAppIcon } from "@/components/Icons";
 import PageHeader from "@/components/PageHeader";
-import { CONTACT } from "@/lib/activities";
+import { CONTACT, openGraphFor, SITE_NAME } from "@/lib/activities";
+
+const title = "Contact Us – Leh, Ladakh";
+const description =
+  "Get in touch with Voyager Ladakh in Choglamsar, Leh. Call +91 9541379356, WhatsApp or email contact@voyagerladakh.com to plan your Ladakh trek, climb or tour.";
 
 export const metadata: Metadata = {
-  title: "Contact Us – Voyager Ladakh, Leh",
-  description:
-    "Get in touch with Voyager Ladakh in Choglamsar, Leh. Call +91 9541379356, WhatsApp or email contact@voyagerladakh.com to plan your Ladakh trek, climb or tour.",
+  title,
+  description,
   keywords: ["contact Voyager Ladakh", "Leh travel agent", "Ladakh tour booking", "Ladakh travel enquiry"],
   alternates: { canonical: "/contact" },
-  openGraph: { url: "/contact" },
+  openGraph: openGraphFor("/contact", `${title} | ${SITE_NAME}`, description),
 };
 
 export default function ContactPage() {

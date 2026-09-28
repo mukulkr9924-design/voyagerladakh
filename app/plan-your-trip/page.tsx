@@ -1,14 +1,18 @@
 import type { Metadata } from "next";
 import EnquiryForm from "@/components/EnquiryForm";
 import PageHeader from "@/components/PageHeader";
+import { openGraphFor, SITE_NAME } from "@/lib/activities";
+
+const title = "Plan Your Ladakh Trip – Get a Custom Itinerary";
+const description =
+  "Tell us your dates and interests and get a tailored Ladakh itinerary for trekking, mountaineering, motorbike touring or cultural travel from our Leh-based team.";
 
 export const metadata: Metadata = {
-  title: "Plan Your Ladakh Trip – Get a Custom Itinerary",
-  description:
-    "Tell us your dates and interests and get a tailored Ladakh itinerary for trekking, mountaineering, motorbike touring or cultural travel from our Leh-based team.",
+  title,
+  description,
   keywords: ["plan Ladakh trip", "Ladakh itinerary", "custom Ladakh tour", "Leh travel planner"],
   alternates: { canonical: "/plan-your-trip" },
-  openGraph: { url: "/plan-your-trip" },
+  openGraph: openGraphFor("/plan-your-trip", `${title} | ${SITE_NAME}`, description),
 };
 
 const steps = [

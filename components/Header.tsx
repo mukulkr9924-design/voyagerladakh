@@ -3,7 +3,6 @@ import Link from "next/link";
 import MobileMenu from "@/components/MobileMenu";
 import { ActivityIcon } from "@/components/Icons";
 import { activities, tripPath, tripsFor } from "@/lib/activities";
-import logo from "@/public/voyager-logo.jpg";
 
 export default function Header() {
   const nav = activities.map((a) => ({
@@ -16,9 +15,16 @@ export default function Header() {
   return (
     <header className="site-header">
       <div className="topbar">
-        <Link href="/" className="brand-link" aria-label="Voyager Ladakh home">
-          <Image src={logo} alt="" className="brand-logo" width={62} preload />
-          <span className="brand-name">Voyager Ladakh</span>
+        <Link href="/" className="brand-link">
+          {/* Above the fold on every page, so preload it (`preload` replaces `priority` in Next 16). */}
+          <Image
+            src="/voyager-ladakh-horizontal.svg"
+            alt="Voyager Ladakh – home"
+            width={467}
+            height={140}
+            className="brand-logo"
+            preload
+          />
         </Link>
 
         <nav className="main-nav" aria-label="Main">

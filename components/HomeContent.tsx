@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Hero from "@/components/Hero";
 import TripCard from "@/components/TripCard";
-import AnimatedRouteMap from "@/components/AnimatedRouteMap";
+import LazyRouteMap from "@/components/LazyRouteMap";
 import CtaBand from "@/components/CtaBand";
 import { ActivityIcon, ArrowIcon } from "@/components/Icons";
 import { activities, tripsFor } from "@/lib/activities";
@@ -72,7 +72,7 @@ export default function HomeContent() {
         </div>
       </section>
 
-      <AnimatedRouteMap />
+      <LazyRouteMap />
 
       <section className="section" aria-labelledby="featured-title">
         <div className="section-heading split">

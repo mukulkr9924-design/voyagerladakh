@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { activities } from "@/lib/activities";
 
 type Status = { kind: "idle" | "sending" | "ok" | "error"; message?: string };
@@ -8,6 +8,11 @@ type Status = { kind: "idle" | "sending" | "ok" | "error"; message?: string };
 export default function EnquiryForm({ variant }: { variant: "contact" | "plan_trip" }) {
   const [status, setStatus] = useState<Status>({ kind: "idle" });
   const isPlan = variant === "plan_trip";
+  const startedAt = useRef(0);
+
+  useEffect(() => {
+    startedAt.current = Date.now();
+  }, []);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -17,7 +22,11 @@ export default function EnquiryForm({ variant }: { variant: "contact" | "plan_tr
       const response = await fetch("/api/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: variant, ...Object.fromEntries(new FormData(form)) }),
+        body: JSON.stringify({
+          type: variant,
+          ...Object.fromEntries(new FormData(form)),
+          elapsedMs: Date.now() - startedAt.current,
+        }),
       });
       const data = await response.json();
       if (!response.ok || !data.success) throw new Error(data.error || "Something went wrong. Please try again.");
@@ -37,6 +46,11 @@ export default function EnquiryForm({ variant }: { variant: "contact" | "plan_tr
 
   return (
     <form className="form" onSubmit={handleSubmit}>
+      {/* Honeypot: hidden from people and screen readers, but bots fill it in. */}
+      <div className="hp-field" aria-hidden="true">
+        <label htmlFor={id("website")}>Website</label>
+        <input id={id("website")} name="website" type="text" tabIndex={-1} autoComplete="off" />
+      </div>
       <div className="form-grid">
         <div className="field">
           <label htmlFor={id("name")}>Name</label>

@@ -3,7 +3,7 @@ import CtaBand from "@/components/CtaBand";
 import JsonLd from "@/components/JsonLd";
 import PageHeader from "@/components/PageHeader";
 import TripCard from "@/components/TripCard";
-import { getActivity, SITE_URL, tripPath, tripsFor } from "@/lib/activities";
+import { getActivity, openGraphFor, SITE_URL, tripPath, tripsFor } from "@/lib/activities";
 import type { ActivityType } from "@/lib/trips";
 
 export function activityMetadata(type: ActivityType): Metadata {
@@ -13,7 +13,7 @@ export function activityMetadata(type: ActivityType): Metadata {
     description: a.metaDescription,
     keywords: a.keywords,
     alternates: { canonical: `/${type}` },
-    openGraph: { title: a.metaTitle, description: a.metaDescription, url: `/${type}` },
+    openGraph: openGraphFor(`/${type}`, a.metaTitle, a.metaDescription),
   };
 }
 

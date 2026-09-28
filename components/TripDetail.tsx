@@ -7,7 +7,7 @@ import JsonLd from "@/components/JsonLd";
 import { Breadcrumbs } from "@/components/PageHeader";
 import TripCard from "@/components/TripCard";
 import { CheckIcon, ClockIcon, CrossIcon, GaugeIcon, GroupIcon, WhatsAppIcon } from "@/components/Icons";
-import { CONTACT, formatPrice, getActivity, SITE_NAME, SITE_URL, tripPath, tripsFor } from "@/lib/activities";
+import { CONTACT, formatPrice, getActivity, openGraphFor, SITE_NAME, SITE_URL, tripPath, tripsFor } from "@/lib/activities";
 import type { ActivityType, Trip } from "@/lib/trips";
 
 function findTrip(type: ActivityType, slug: string) {
@@ -33,12 +33,8 @@ export async function tripMetadata(type: ActivityType, params: Promise<{ slug: s
     description,
     keywords: [trip.title, `${activity.name} Ladakh`, "Leh", SITE_NAME],
     alternates: { canonical: tripPath(trip) },
-    openGraph: {
-      title: trip.title,
-      description,
-      url: tripPath(trip),
-      images: [{ url: trip.images[0], width: 1800, alt: trip.title }],
-    },
+    openGraph: openGraphFor(tripPath(trip), trip.title, description, [{ url: trip.images[0], width: 1800, alt: trip.title }]),
+    twitter: { card: "summary_large_image" },
   };
 }
 

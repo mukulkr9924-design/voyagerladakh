@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -42,6 +43,9 @@ export default function MobileMenu({ links }: { links: { href: string; label: st
 
       <div className={`drawer-backdrop${open ? " is-open" : ""}`} onClick={() => setOpen(false)} aria-hidden="true" />
       <nav id="mobile-drawer" className={`mobile-drawer${open ? " is-open" : ""}`} aria-label="Mobile" inert={!open}>
+        <Link href="/" className="drawer-logo">
+          <Image src="/voyager-ladakh-horizontal.svg" alt="Voyager Ladakh – home" width={467} height={140} />
+        </Link>
         <ul>
           {links.map((l) => (
             <li key={l.href}>
