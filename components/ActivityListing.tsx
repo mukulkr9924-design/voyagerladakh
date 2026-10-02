@@ -1,25 +1,26 @@
 import type { Metadata } from "next";
+import { stegaClean } from "next-sanity";
 import CtaBand from "@/components/CtaBand";
 import JsonLd from "@/components/JsonLd";
 import PageHeader from "@/components/PageHeader";
 import TripCard from "@/components/TripCard";
-import { getActivity, openGraphFor, SITE_URL, tripPath, tripsFor } from "@/lib/activities";
+import { SITE_URL, socialFor, tripPath } from "@/lib/activities";
+import { getActivity, getSettings, tripsFor } from "@/lib/content";
 import type { ActivityType } from "@/lib/trips";
 
-export function activityMetadata(type: ActivityType): Metadata {
-  const a = getActivity(type);
+export async function activityMetadata(type: ActivityType): Promise<Metadata> {
+  const [a, list] = stegaClean(await Promise.all([getActivity(type), tripsFor(type)]));
   return {
     title: a.metaTitle,
     description: a.metaDescription,
     keywords: a.keywords,
     alternates: { canonical: `/${type}` },
-    openGraph: openGraphFor(`/${type}`, a.metaTitle, a.metaDescription),
+    ...socialFor(`/${type}`, a.metaTitle, a.metaDescription, list[0]?.heroImage),
   };
 }
 
-export default function ActivityListing({ type }: { type: ActivityType }) {
-  const activity = getActivity(type);
-  const list = tripsFor(type);
+export default async function ActivityListing({ type }: { type: ActivityType }) {
+  const [activity, list, settings] = await Promise.all([getActivity(type), tripsFor(type), getSettings()]);
 
   return (
     <>
@@ -34,10 +35,7 @@ export default function ActivityListing({ type }: { type: ActivityType }) {
           {list.map((trip) => <TripCard key={trip.id} trip={trip} headingLevel="h2" />)}
         </div>
       </section>
-      <CtaBand
-        title="Don't see the right route?"
-        text="Every journey can be tailored to your dates, fitness and group. Tell us what you have in mind."
-      />
+      <CtaBand title={settings.listingCtaTitle} text={settings.listingCtaText} />
       <JsonLd
         data={{
           "@context": "https://schema.org",

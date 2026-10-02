@@ -1,9 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { InstagramIcon, MailIcon, PhoneIcon, PinIcon, WhatsAppIcon } from "@/components/Icons";
-import { activities, CONTACT } from "@/lib/activities";
+import { getActivities, getSettings } from "@/lib/content";
 
-export default function Footer() {
+export default async function Footer() {
+  const [activities, { contact: CONTACT, footerBlurb }] = await Promise.all([getActivities(), getSettings()]);
   return (
     <footer className="footer">
       <div className="footer-inner">
@@ -12,14 +13,13 @@ export default function Footer() {
           <Link href="/" className="footer-logo">
             <Image src="/voyager-ladakh-horizontal-dark.svg" alt="Voyager Ladakh – home" width={467} height={140} />
           </Link>
-          <p>
-            A Leh-based local team planning treks, climbs, rides and cultural journeys across Ladakh, with
-            guides, hosts and drivers from the valleys we travel through.
-          </p>
+          <p>{footerBlurb}</p>
           <div className="footer-social">
-            <a href={CONTACT.instagram} target="_blank" rel="noopener noreferrer" aria-label="Voyager Ladakh on Instagram">
-              <InstagramIcon />
-            </a>
+            {CONTACT.instagram && (
+              <a href={CONTACT.instagram} target="_blank" rel="noopener noreferrer" aria-label="Voyager Ladakh on Instagram">
+                <InstagramIcon />
+              </a>
+            )}
             <a href={CONTACT.whatsapp} target="_blank" rel="noopener noreferrer" aria-label="Chat on WhatsApp">
               <WhatsAppIcon />
             </a>

@@ -1,10 +1,11 @@
 import { WhatsAppIcon } from "@/components/Icons";
-import { CONTACT } from "@/lib/activities";
+import { getSettings } from "@/lib/content";
 
-export default function FloatingWhatsApp() {
+export default async function FloatingWhatsApp() {
+  const { contact } = await getSettings();
   return (
     <a
-      href={CONTACT.whatsapp}
+      href={contact.whatsapp}
       target="_blank"
       rel="noopener noreferrer"
       className="floating-whatsapp"

@@ -9,12 +9,20 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@sanity/icons": "^5.2.3",
+    "@sanity/image-url": "^2.1.1",
+    "@sanity/orderable-document-list": "^2.0.25",
+    "@sanity/vision": "^6.17.0",
     "framer-motion": "^13.2.0",
     "gsap": "^3.15.0",
+    "lexorank": "^1.0.5",
     "next": "16.3.4",
+    "next-sanity": "^13.3.4",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "resend": "^6.28.0"
+    "resend": "^6.28.0",
+    "sanity": "^6.17.0",
+    "styled-components": "^6.5.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

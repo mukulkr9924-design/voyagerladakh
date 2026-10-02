@@ -1,11 +1,10 @@
 "use client";
 
 import { FormEvent, useEffect, useRef, useState } from "react";
-import { activities } from "@/lib/activities";
 
 type Status = { kind: "idle" | "sending" | "ok" | "error"; message?: string };
 
-export default function EnquiryForm({ variant }: { variant: "contact" | "plan_trip" }) {
+export default function EnquiryForm({ variant, journeyTypes = [] }: { variant: "contact" | "plan_trip"; journeyTypes?: string[] }) {
   const [status, setStatus] = useState<Status>({ kind: "idle" });
   const isPlan = variant === "plan_trip";
   const startedAt = useRef(0);
@@ -70,7 +69,7 @@ export default function EnquiryForm({ variant }: { variant: "contact" | "plan_tr
               <label htmlFor={id("activity")}>Journey type</label>
               <select id={id("activity")} name="activity" required defaultValue="">
                 <option value="" disabled>Select a journey</option>
-                {activities.map((a) => <option key={a.type} value={a.name}>{a.name}</option>)}
+                {journeyTypes.map((name) => <option key={name} value={name}>{name}</option>)}
                 <option value="Not sure yet">Not sure yet</option>
               </select>
             </div>

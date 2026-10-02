@@ -11,6 +11,49 @@ A modern, responsive travel website showcasing the beauty and adventures of Lada
 - **WhatsApp Integration**: Floating WhatsApp button for instant contact
 - **Modern UI**: Clean, contemporary design with custom branding
 
+## Content (Sanity CMS)
+
+All website content (trips, category pages, home/about/contact/plan pages, contact details, SEO text and photos) lives in Sanity project `2brjvlhw`, dataset `production`. The Studio is part of this app and is deployed with it:
+
+- **Live:** https://voyagerladakh.com/studio
+- **Local:** `npm run dev`, then http://localhost:3000/studio
+
+Editors sign in with the account they were invited with (manage members at sanity.io/manage).
+
+### Managing trips
+
+- **Add:** open a category (e.g. *Trekking & Hiking*), click **+** / *Add … trip*, fill in the fields, click **Generate** next to *Web address*, then **Publish**.
+- **Edit:** open the trip, change it, then **Publish**.
+- **Reorder:** drag trips within a category list. The order is the order on the website.
+- **Remove:** open the trip and choose **Delete** from the menu next to Publish (or **Unpublish** to hide it but keep it).
+
+Published changes appear on the site immediately (via the webhook below), or within a minute at most.
+
+### Live preview (Presentation)
+
+Open **Live preview** in the Studio's top bar to edit beside a live view of the site. Unpublished drafts show in the preview,
+and clicking any text on the page opens the field that holds it. Visitors only ever see published content.
+
+### Environment variables
+
+Set these in Vercel (Project → Settings → Environment Variables) and in `.env.local` for local development:
+
+| Variable | Used for |
+| --- | --- |
+| `SANITY_API_READ_TOKEN` | Draft previews in Live preview. A Viewer token from sanity.io/manage → API → Tokens. |
+| `SANITY_REVALIDATE_SECRET` | Verifies calls from the Sanity webhook to `/api/revalidate`. Must match the webhook's secret. |
+
+The webhook "Revalidate voyagerladakh.com" (sanity.io/manage → API → Webhooks) calls `https://voyagerladakh.com/api/revalidate`
+on every create, update or delete, so published changes go live straight away.
+
+### Code layout
+
+- `sanity.config.ts`: Studio config (served at `/studio` by `app/studio/[[...tool]]/page.tsx`)
+- `sanity/schemaTypes/`: content model; `sanity/structure.ts` sets up the Studio sidebar
+- `sanity/presentation.ts`: which pages each document appears on in Live preview
+- `lib/content.ts`: GROQ queries used by the pages
+- `app/(site)/`: the website routes, with header/footer in `app/(site)/layout.tsx`
+
 ## Tech Stack
 
 - **Framework**: Next.js 16.3.4 (App Router)
@@ -18,6 +61,7 @@ A modern, responsive travel website showcasing the beauty and adventures of Lada
 - **Animations**: Framer Motion 13.2.0, GSAP 3.15.0
 - **Language**: TypeScript
 - **Runtime**: React 19.2.8
+- **CMS**: Sanity (embedded Studio via next-sanity)
 
 ## Getting Started
 

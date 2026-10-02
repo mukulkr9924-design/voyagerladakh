@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useRef, useState } from "react";
+import { type ComponentProps, useEffect, useRef, useState } from "react";
 
 // The map pulls in gsap + framer-motion, so its code is only fetched once the
 // visitor scrolls near it.
@@ -10,7 +10,7 @@ const AnimatedRouteMap = dynamic(() => import("@/components/AnimatedRouteMap"), 
   loading: () => <div className="lmap-placeholder" aria-hidden="true" />,
 });
 
-export default function LazyRouteMap() {
+export default function LazyRouteMap(props: ComponentProps<typeof AnimatedRouteMap>) {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
 
@@ -31,6 +31,6 @@ export default function LazyRouteMap() {
     return () => io.disconnect();
   }, []);
 
-  if (visible) return <AnimatedRouteMap />;
+  if (visible) return <AnimatedRouteMap {...props} />;
   return <div ref={ref} className="lmap-placeholder" aria-hidden="true" />;
 }

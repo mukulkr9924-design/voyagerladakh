@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowIcon, ClockIcon, GroupIcon } from "@/components/Icons";
-import { formatGroupSize, formatPrice, tripPath } from "@/lib/activities";
+import { ArrowIcon, CalendarIcon, ClockIcon, GroupIcon } from "@/components/Icons";
+import { formatGroupSize, tripPath } from "@/lib/activities";
 import type { Trip } from "@/lib/trips";
 
 export default function TripCard({ trip, headingLevel = "h3" }: { trip: Trip; headingLevel?: "h2" | "h3" }) {
@@ -10,9 +10,10 @@ export default function TripCard({ trip, headingLevel = "h3" }: { trip: Trip; he
     <article className="trip-card reveal">
       <div className="trip-card-media">
         <Image
-          src={trip.images[0]}
+          src={trip.heroImage.url}
           alt=""
           fill
+          style={trip.heroImage.position ? { objectPosition: trip.heroImage.position } : undefined}
           sizes="(max-width: 700px) 100vw, (max-width: 1100px) 50vw, 420px"
         />
         <span className={`badge badge-${trip.difficulty.toLowerCase()}`}>{trip.difficulty}</span>
@@ -25,12 +26,10 @@ export default function TripCard({ trip, headingLevel = "h3" }: { trip: Trip; he
         <ul className="trip-card-meta">
           <li><ClockIcon />{trip.duration}</li>
           <li><GroupIcon />{formatGroupSize(trip.groupSize)}</li>
+          <li><CalendarIcon /><span className="sr-only">Best season: </span>{trip.bestSeason}</li>
         </ul>
         <div className="trip-card-foot">
-          <p className="trip-card-price">
-            <small>From</small>
-            {formatPrice(trip.price)}
-          </p>
+          <span className="trip-card-cta">View trip</span>
           <span className="trip-card-go" aria-hidden="true"><ArrowIcon /></span>
         </div>
       </div>

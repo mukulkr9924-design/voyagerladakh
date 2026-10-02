@@ -1,7 +1,9 @@
 import JsonLd from "@/components/JsonLd";
-import { CONTACT, SITE_NAME, SITE_URL } from "@/lib/activities";
+import { SITE_NAME, SITE_URL } from "@/lib/activities";
+import { getSettings } from "@/lib/content";
 
-export default function StructuredData() {
+export default async function StructuredData() {
+  const { contact: CONTACT, organizationDescription } = await getSettings();
   return (
     <JsonLd
       data={{
@@ -9,7 +11,7 @@ export default function StructuredData() {
         "@type": "TravelAgency",
         "@id": `${SITE_URL}/#organization`,
         name: SITE_NAME,
-        description: "Leh-based adventure planning for trekking, mountaineering, motorbike touring and cultural journeys across Ladakh",
+        description: organizationDescription,
         url: SITE_URL,
         logo: `${SITE_URL}/voyager-ladakh-app-icon-512.png`,
         image: `${SITE_URL}/voyager-ladakh-horizontal.png`,
@@ -17,17 +19,18 @@ export default function StructuredData() {
         email: CONTACT.email,
         address: {
           "@type": "PostalAddress",
-          streetAddress: "Near Akama Restaurant, Zumpa Choglamsar",
-          addressLocality: "Leh",
-          addressRegion: "Ladakh",
-          postalCode: "194104",
+          streetAddress: CONTACT.streetAddress,
+          addressLocality: CONTACT.locality,
+          addressRegion: CONTACT.region,
+          postalCode: CONTACT.postalCode,
           addressCountry: "IN",
         },
-        geo: { "@type": "GeoCoordinates", latitude: 34.1526, longitude: 77.577 },
+        geo: CONTACT.latitude !== undefined && CONTACT.longitude !== undefined
+          ? { "@type": "GeoCoordinates", latitude: CONTACT.latitude, longitude: CONTACT.longitude }
+          : undefined,
         areaServed: { "@type": "Place", name: "Ladakh, India" },
-        sameAs: [CONTACT.instagram],
-        priceRange: "₹₹",
-        openingHours: "Mo-Su 09:00-18:00",
+        sameAs: CONTACT.instagram ? [CONTACT.instagram] : [],
+        openingHours: CONTACT.openingHours,
       }}
     />
   );

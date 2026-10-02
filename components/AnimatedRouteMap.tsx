@@ -5,107 +5,21 @@ import Link from "next/link";
 import { gsap } from "gsap";
 import { AnimatePresence, motion } from "framer-motion";
 
-type LabelSide = "top" | "bottom" | "left" | "right";
+import type { MapStop } from "@/lib/content";
 
-type Stop = {
-  name: string;
-  x: number;
-  y: number;
-  label: LabelSide;
-  altitude: string;
-  tag: string;
-  tagline: string;
-  desc: string;
-  highlights: string[];
-};
-
-// Stylised positions on a 1000 x 600 canvas — roughly geographic, not to scale.
-const STOPS: Stop[] = [
-  {
-    name: "Kargil",
-    x: 95, y: 190, label: "bottom",
-    altitude: "2,676 m",
-    tag: "Gateway",
-    tagline: "Where the road from Kashmir meets Ladakh",
-    desc: "Apricot orchards line the Suru river in this old trading town — the western doorway to Ladakh and base for the Drass war memorial.",
-    highlights: ["Kargil War Memorial, Drass", "Suru Valley drive", "Hundarman heritage village"],
-  },
-  {
-    name: "Mulbek",
-    x: 190, y: 262, label: "bottom",
-    altitude: "3,304 m",
-    tag: "Heritage",
-    tagline: "The Maitreya carved in stone",
-    desc: "A towering Maitreya Buddha, carved into a single rock face centuries ago, watches over the highway beneath a cliff-top gompa.",
-    highlights: ["Mulbek Chamba rock statue", "Cliff-top Mulbek Gompa", "Namika La pass"],
-  },
-  {
-    name: "Lamayuru",
-    x: 300, y: 300, label: "bottom",
-    altitude: "3,510 m",
-    tag: "Monastery",
-    tagline: "Moonland and one of Ladakh's oldest gompas",
-    desc: "Eroded ochre badlands earn this valley its 'Moonland' name. Lamayuru monastery clings to the ridge above, a thousand years in the making.",
-    highlights: ["Lamayuru Monastery", "Moonland at golden hour", "Fotu La — highest point on the Srinagar–Leh road"],
-  },
-  {
-    name: "Aryan Valley",
-    x: 335, y: 160, label: "top",
-    altitude: "≈2,900 m",
-    tag: "Culture",
-    tagline: "Land of the Brokpa",
-    desc: "Down the Indus lie Dha, Hanu and Garkone — villages of the Brokpa people, known for flower-crowned headdresses, orchards and a culture unlike anywhere else in Ladakh.",
-    highlights: ["Dha & Garkone villages", "Brokpa floral headdresses", "Apricot & walnut orchards"],
-  },
-  {
-    name: "Leh",
-    x: 478, y: 330, label: "bottom",
-    altitude: "3,500 m",
-    tag: "Base camp",
-    tagline: "The heart of Ladakh",
-    desc: "Acclimatise among whitewashed stupas, prayer flags and the old town bazaar. Every great Ladakh journey starts and ends here.",
-    highlights: ["Leh Palace & old town", "Sunset at Shanti Stupa", "Thiksey & Hemis monasteries"],
-  },
-  {
-    name: "Nubra Valley",
-    x: 525, y: 138, label: "top",
-    altitude: "3,048 m",
-    tag: "High pass",
-    tagline: "Sand dunes beyond Khardung La",
-    desc: "Crest one of the world's highest motorable passes and drop into a valley of sand dunes, double-humped camels and the Shyok river.",
-    highlights: ["Khardung La crossing", "Hunder dunes & Bactrian camels", "Diskit Monastery's giant Maitreya"],
-  },
-  {
-    name: "Pangong Lake",
-    x: 772, y: 250, label: "top",
-    altitude: "4,225 m",
-    tag: "Lake",
-    tagline: "The lake of a hundred blues",
-    desc: "A 134 km sliver of brackish water stretching into Tibet, shifting from turquoise to deep indigo as the light moves across it.",
-    highlights: ["Sunrise at Spangmik", "Lakeside camps at Merak", "Ever-changing colours"],
-  },
-  {
-    name: "Hanle",
-    x: 880, y: 500, label: "bottom",
-    altitude: "4,500 m",
-    tag: "Stargazing",
-    tagline: "India's first Dark Sky Reserve",
-    desc: "On the remote Changthang plateau, the night sky is so clear that India built an astronomical observatory here. The Milky Way is the main event.",
-    highlights: ["Milky Way stargazing", "Indian Astronomical Observatory", "17th-century Hanle Monastery"],
-  },
-  {
-    name: "Tso Moriri",
-    x: 628, y: 470, label: "left",
-    altitude: "4,522 m",
-    tag: "Wildlife",
-    tagline: "The quiet lake of Changthang",
-    desc: "A protected wetland ringed by snow peaks, home to nomadic Changpa herders, bar-headed geese and wild kiang roaming its shores.",
-    highlights: ["Korzok village & monastery", "Bar-headed geese & kiang", "Changpa nomad camps"],
-  },
-];
+type LabelSide = MapStop["label"];
 
 // Signed bend per road segment: how far the curve bows away from a straight line.
+// Segments beyond this list (when stops are added in the Studio) alternate a gentle bend.
 const BENDS = [0.18, -0.22, 0.28, 0.22, -0.3, 0.2, -0.16, 0.22];
+const bendAt = (i: number) => BENDS[i] ?? (i % 2 ? -0.2 : 0.2);
+
+// Mountain passes drawn on the road between two named stops, `t` of the way along.
+const PASSES = [
+  { name: "Namika La", from: "Mulbek", to: "Lamayuru", t: 0.35 },
+  { name: "Fotu La", from: "Mulbek", to: "Lamayuru", t: 0.78 },
+  { name: "Khardung La", from: "Leh", to: "Nubra Valley", t: 0.5 },
+];
 
 type Pt = { x: number; y: number };
 
@@ -116,30 +30,33 @@ function controlPoint(a: Pt, b: Pt, bend: number): Pt {
   };
 }
 
-function pointOnSegment(i: number, t: number): Pt {
-  const a = STOPS[i];
-  const b = STOPS[i + 1];
-  const c = controlPoint(a, b, BENDS[i]);
-  const u = 1 - t;
-  return {
-    x: u * u * a.x + 2 * u * t * c.x + t * t * b.x,
-    y: u * u * a.y + 2 * u * t * c.y + t * t * b.y,
+function routeGeometry(stops: MapStop[]) {
+  const pointOnSegment = (i: number, t: number): Pt => {
+    const a = stops[i];
+    const b = stops[i + 1];
+    const c = controlPoint(a, b, bendAt(i));
+    const u = 1 - t;
+    return {
+      x: u * u * a.x + 2 * u * t * c.x + t * t * b.x,
+      y: u * u * a.y + 2 * u * t * c.y + t * t * b.y,
+    };
   };
+
+  const segments = stops.slice(0, -1).map((a, i) => {
+    const b = stops[i + 1];
+    const c = controlPoint(a, b, bendAt(i));
+    return `M${a.x} ${a.y} Q${c.x.toFixed(1)} ${c.y.toFixed(1)} ${b.x} ${b.y}`;
+  });
+
+  const routeD = segments.map((d, i) => (i === 0 ? d : d.replace(/^M[^Q]+/, ""))).join(" ");
+
+  const passes = PASSES.flatMap((p) => {
+    const i = stops.findIndex((s, k) => s.name === p.from && stops[k + 1]?.name === p.to);
+    return i === -1 ? [] : [{ name: p.name, ...pointOnSegment(i, p.t) }];
+  });
+
+  return { segments, routeD, passes };
 }
-
-const SEGMENTS = STOPS.slice(0, -1).map((a, i) => {
-  const b = STOPS[i + 1];
-  const c = controlPoint(a, b, BENDS[i]);
-  return `M${a.x} ${a.y} Q${c.x.toFixed(1)} ${c.y.toFixed(1)} ${b.x} ${b.y}`;
-});
-
-const ROUTE_D = SEGMENTS.map((d, i) => (i === 0 ? d : d.replace(/^M[^Q]+/, ""))).join(" ");
-
-const PASSES = [
-  { name: "Namika La", ...pointOnSegment(1, 0.35) },
-  { name: "Fotu La", ...pointOnSegment(1, 0.78) },
-  { name: "Khardung La", ...pointOnSegment(4, 0.5) },
-];
 
 // Deterministic contour rings around a few massifs for a topographic feel.
 function contourRings(cx: number, cy: number, r: number, seed: number, rings: number) {
@@ -188,7 +105,8 @@ function labelProps(side: LabelSide) {
   }
 }
 
-export default function AnimatedRouteMap() {
+export default function AnimatedRouteMap({ stops, kicker, title, intro }: { stops: MapStop[]; kicker?: string; title?: string; intro?: string }) {
+  const { segments, routeD, passes } = useMemo(() => routeGeometry(stops), [stops]);
   const sectionRef = useRef<HTMLElement>(null);
   const baseRef = useRef<SVGPathElement>(null);
   const progressRef = useRef<SVGPathElement>(null);
@@ -206,7 +124,7 @@ export default function AnimatedRouteMap() {
   const [autoplay, setAutoplay] = useState(true);
   const [reducedMotion, setReducedMotion] = useState(false);
 
-  const stop = STOPS[active];
+  const stop = stops[active] ?? stops[0];
 
   const placeTraveler = useCallback((len: number) => {
     const progress = progressRef.current;
@@ -238,7 +156,7 @@ export default function AnimatedRouteMap() {
     base.style.strokeDashoffset = `${total}`;
     progress.style.strokeDasharray = `${total}`;
     placeTraveler(0);
-  }, [placeTraveler]);
+  }, [placeTraveler, routeD]);
 
   // Reveal once the map scrolls into view.
   useEffect(() => {
@@ -299,13 +217,13 @@ export default function AnimatedRouteMap() {
   // Guided tour until the visitor takes over.
   useEffect(() => {
     if (!ready || !autoplay || reducedMotion) return;
-    const id = window.setTimeout(() => setActive((i) => (i + 1) % STOPS.length), AUTOPLAY_MS);
+    const id = window.setTimeout(() => setActive((i) => (i + 1) % stops.length), AUTOPLAY_MS);
     return () => window.clearTimeout(id);
-  }, [ready, autoplay, reducedMotion, active]);
+  }, [ready, autoplay, reducedMotion, active, stops.length]);
 
   const select = (i: number) => {
     setAutoplay(false);
-    setActive((i + STOPS.length) % STOPS.length);
+    setActive((i + stops.length) % stops.length);
   };
 
   const onKeyDown = (e: React.KeyboardEvent) => {
@@ -318,7 +236,7 @@ export default function AnimatedRouteMap() {
     }
   };
 
-  const tourProgress = useMemo(() => ((active + 1) / STOPS.length) * 100, [active]);
+  const tourProgress = ((active + 1) / stops.length) * 100;
 
   return (
     <section ref={sectionRef} className="lmap-section" aria-labelledby="lmap-title">
@@ -329,9 +247,9 @@ export default function AnimatedRouteMap() {
         viewport={{ once: true }}
         transition={{ duration: 0.6 }}
       >
-        <span className="kicker">Route map</span>
-        <h2 id="lmap-title">Nine places that define Ladakh</h2>
-        <p>From the apricot orchards of Kargil to the silent shores of Tso Moriri — tap any stop to travel there.</p>
+        {kicker && <span className="kicker">{kicker}</span>}
+        <h2 id="lmap-title">{title}</h2>
+        {intro && <p>{intro}</p>}
       </motion.div>
 
       <div className={`lmap-shell${revealed ? " is-revealed" : ""}`} onKeyDown={onKeyDown}>
@@ -391,15 +309,15 @@ export default function AnimatedRouteMap() {
               </g>
             </g>
 
-            {SEGMENTS.map((d, i) => (
+            {segments.map((d, i) => (
               <path key={i} ref={(el) => { segmentRefs.current[i] = el; }} d={d} fill="none" stroke="none" />
             ))}
 
-            <path ref={baseRef} className="lmap-road" d={ROUTE_D} />
-            <path ref={progressRef} className="lmap-road-progress" d={ROUTE_D} filter="url(#lmap-glow)" />
+            <path ref={baseRef} className="lmap-road" d={routeD} />
+            <path ref={progressRef} className="lmap-road-progress" d={routeD} filter="url(#lmap-glow)" />
 
             <g className="lmap-passes" aria-hidden="true">
-              {PASSES.map((p) => (
+              {passes.map((p) => (
                 <g key={p.name} transform={`translate(${p.x.toFixed(1)} ${p.y.toFixed(1)})`}>
                   <path d="M-6 4 L0 -6 L6 4 Z" />
                   <text x="9" y="-6">{p.name}</text>
@@ -407,7 +325,7 @@ export default function AnimatedRouteMap() {
               ))}
             </g>
 
-            {STOPS.map((s, i) => {
+            {stops.map((s, i) => {
               const lp = labelProps(s.label);
               const isActive = i === active;
               const visited = ready && i <= active;
@@ -480,7 +398,7 @@ export default function AnimatedRouteMap() {
           <div className="lmap-panel-top">
             <span className="lmap-count">
               {String(active + 1).padStart(2, "0")}
-              <small> / {String(STOPS.length).padStart(2, "0")}</small>
+              <small> / {String(stops.length).padStart(2, "0")}</small>
             </span>
             <span className="lmap-tag">{stop.tag}</span>
           </div>
@@ -517,7 +435,7 @@ export default function AnimatedRouteMap() {
       </div>
 
       <div ref={railRef} className="lmap-rail" role="tablist" aria-label="Ladakh stops">
-        {STOPS.map((s, i) => (
+        {stops.map((s, i) => (
           <button
             key={s.name}
             type="button"

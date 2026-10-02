@@ -2,14 +2,16 @@ import Image from "next/image";
 import Link from "next/link";
 import MobileMenu from "@/components/MobileMenu";
 import { ActivityIcon } from "@/components/Icons";
-import { activities, tripPath, tripsFor } from "@/lib/activities";
+import { tripPath } from "@/lib/activities";
+import { getActivities, getSettings, getTrips } from "@/lib/content";
 
-export default function Header() {
+export default async function Header() {
+  const [activities, trips, { contact }] = await Promise.all([getActivities(), getTrips(), getSettings()]);
   const nav = activities.map((a) => ({
     href: `/${a.type}`,
     label: a.name,
     type: a.type,
-    trips: tripsFor(a.type).map((t) => ({ href: tripPath(t), title: t.title, duration: t.duration })),
+    trips: trips.filter((t) => t.activityType === a.type).map((t) => ({ href: tripPath(t), title: t.title, duration: t.duration })),
   }));
 
   return (
@@ -61,6 +63,8 @@ export default function Header() {
         <Link href="/plan-your-trip" className="btn primary header-cta">Plan your trip</Link>
 
         <MobileMenu
+          phone={contact.phone}
+          phoneHref={contact.phoneHref}
           links={[
             ...nav.map(({ href, label }) => ({ href, label })),
             { href: "/about", label: "About" },

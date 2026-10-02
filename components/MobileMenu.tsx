@@ -4,9 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { CONTACT } from "@/lib/activities";
 
-export default function MobileMenu({ links }: { links: { href: string; label: string }[] }) {
+export default function MobileMenu({ links, phone, phoneHref }: { links: { href: string; label: string }[]; phone: string; phoneHref: string }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
@@ -54,7 +53,7 @@ export default function MobileMenu({ links }: { links: { href: string; label: st
           ))}
         </ul>
         <Link href="/plan-your-trip" className="btn primary">Plan your trip</Link>
-        <a href={CONTACT.phoneHref} className="drawer-phone">{CONTACT.phone}</a>
+        <a href={phoneHref} className="drawer-phone">{phone}</a>
       </nav>
     </>
   );
