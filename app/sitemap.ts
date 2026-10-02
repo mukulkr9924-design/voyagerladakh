@@ -26,7 +26,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...trips.map((t) => ({
       ...page(tripPath(t), 0.8),
       lastModified: t.updatedAt,
-      images: [absoluteUrl(sanityImageUrl(t.heroImage.url, SHARE_IMAGE_WIDTH))],
+      // Next writes image URLs into the XML as is; an unescaped "&" from the query string makes the whole sitemap invalid.
+      images: [absoluteUrl(sanityImageUrl(t.heroImage.url, SHARE_IMAGE_WIDTH)).replace(/&/g, "&amp;")],
     })),
     page("/plan-your-trip", 0.7),
     page("/about", 0.6),
