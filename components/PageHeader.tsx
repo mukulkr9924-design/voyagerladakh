@@ -1,14 +1,17 @@
-import Link from "next/link";
 import JsonLd from "@/components/JsonLd";
-import { SITE_URL } from "@/lib/activities";
+import Link from "@/components/LocaleLink";
+import { absoluteUrl } from "@/lib/activities";
+import { localePath } from "@/lib/i18n";
+import { getI18n } from "@/lib/locale";
 
 export type Crumb = { name: string; href: string };
 
-export function Breadcrumbs({ items }: { items: Crumb[] }) {
-  const all = [{ name: "Home", href: "/" }, ...items];
+export async function Breadcrumbs({ items }: { items: Crumb[] }) {
+  const { locale, t } = await getI18n();
+  const all = [{ name: t.common.home, href: "/" }, ...items];
   return (
     <>
-      <nav className="breadcrumbs" aria-label="Breadcrumb">
+      <nav className="breadcrumbs" aria-label={t.common.breadcrumb}>
         <ol>
           {all.map((c, i) => (
             <li key={c.href}>
@@ -25,7 +28,7 @@ export function Breadcrumbs({ items }: { items: Crumb[] }) {
             "@type": "ListItem",
             position: i + 1,
             name: c.name,
-            item: `${SITE_URL}${c.href === "/" ? "" : c.href}`,
+            item: absoluteUrl(localePath(locale, c.href)).replace(/\/$/, ""),
           })),
         }}
       />

@@ -1,40 +1,43 @@
 import type { Metadata } from "next";
 import { stegaClean } from "next-sanity";
 import Image from "next/image";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import CtaBand from "@/components/CtaBand";
 import ElevationProfile from "@/components/ElevationProfile";
 import JsonLd from "@/components/JsonLd";
+import Link from "@/components/LocaleLink";
 import { Breadcrumbs } from "@/components/PageHeader";
 import TripCard from "@/components/TripCard";
 import TripGallery from "@/components/TripGallery";
 import { CheckIcon, ClockIcon, CrossIcon, GaugeIcon, GroupIcon, WhatsAppIcon } from "@/components/Icons";
-import { absoluteUrl, formatGroupSize, formatRoute, SITE_NAME, SITE_URL, socialFor, tripPath } from "@/lib/activities";
+import { absoluteUrl, difficultyLabel, formatGroupSize, formatRoute, pageMeta, SITE_NAME, SITE_URL, tripPath } from "@/lib/activities";
 import { getActivity, getSettings, getTrip, tripsFor } from "@/lib/content";
+import type { Dictionary } from "@/lib/dictionaries";
+import { DEFAULT_LOCALE, format, LANGUAGES, localePath } from "@/lib/i18n";
+import { getI18n } from "@/lib/locale";
 import { SHARE_IMAGE_WIDTH, sanityImageUrl } from "@/sanity/lib/imageUrl";
 import type { ActivityType, Trip } from "@/lib/trips";
 
+// Trip addresses are the same in every language.
 export async function tripStaticParams(type: ActivityType) {
-  return (await tripsFor(type)).map((t) => ({ slug: t.slug }));
+  return (await tripsFor(type, DEFAULT_LOCALE)).map((t) => ({ slug: t.slug }));
 }
 
-function metaDescription(trip: Trip) {
-  const text = `${trip.title}: ${trip.duration}, ${trip.difficulty.toLowerCase()}. ${trip.description}`;
+function metaDescription(trip: Trip, t: Dictionary) {
+  const text = `${trip.title}: ${trip.duration}, ${difficultyLabel(trip.difficulty, t).toLowerCase()}. ${trip.description}`;
   return text.length > 158 ? `${text.slice(0, 155).replace(/\s+\S*$/, "")}…` : text;
 }
 
 export async function tripMetadata(type: ActivityType, params: Promise<{ slug: string }>): Promise<Metadata> {
   const trip = stegaClean(await getTrip(type, (await params).slug));
   if (!trip) return {};
-  const activity = stegaClean(await getActivity(type));
-  const description = metaDescription(trip);
+  const [activity, { locale, t }] = stegaClean(await Promise.all([getActivity(type), getI18n()]));
+  const description = metaDescription(trip, t);
   return {
-    title: `${trip.title} – ${activity.name} in Ladakh`,
+    title: format(t.trip.metaTitle, { title: trip.title, activity: activity.name }),
     description,
     keywords: [trip.title, `${activity.name} Ladakh`, "Leh", SITE_NAME],
-    alternates: { canonical: tripPath(trip) },
-    ...socialFor(tripPath(trip), trip.title, description, trip.heroImage),
+    ...pageMeta(locale, tripPath(trip), trip.title, description, trip.heroImage),
   };
 }
 
@@ -42,18 +45,18 @@ export default async function TripDetail({ type, params }: { type: ActivityType;
   const trip = await getTrip(type, (await params).slug);
   if (!trip) notFound();
 
-  const [activity, siblings, { contact }] = await Promise.all([getActivity(type), tripsFor(type), getSettings()]);
-  const related = siblings.filter((t) => t.id !== trip.id).slice(0, 3);
+  const [activity, siblings, { contact }, { locale, t }] = await Promise.all([getActivity(type), tripsFor(type), getSettings(), getI18n()]);
+  const related = siblings.filter((s) => s.id !== trip.id).slice(0, 3);
   const facts = [
-    { icon: <ClockIcon />, label: "Duration", value: trip.duration },
-    { icon: <GaugeIcon />, label: "Difficulty", value: trip.difficulty },
-    { icon: <GroupIcon />, label: "Group size", value: formatGroupSize(trip.groupSize) },
+    { icon: <ClockIcon />, label: t.trip.duration, value: trip.duration },
+    { icon: <GaugeIcon />, label: t.trip.difficulty, value: difficultyLabel(trip.difficulty, t) },
+    { icon: <GroupIcon />, label: t.trip.groupSize, value: formatGroupSize(trip.groupSize, t) },
   ];
   const details = [
     ...facts,
-    { label: "Best season", value: trip.bestSeason },
-    { label: "Start / end", value: formatRoute(trip) },
-    { label: "Stay", value: trip.stay },
+    { label: t.trip.bestSeason, value: trip.bestSeason },
+    { label: t.trip.startEnd, value: formatRoute(trip, t, locale) },
+    { label: t.trip.stay, value: trip.stay },
   ];
   const photos = trip.gallery.length > 0 ? trip.gallery : [{ ...trip.heroImage, alt: trip.heroImage.alt || trip.title }];
 
@@ -82,24 +85,24 @@ export default async function TripDetail({ type, params }: { type: ActivityType;
       <div className="trip-layout">
         <div className="trip-main">
           <section aria-labelledby="overview">
-            <h2 id="overview">Overview</h2>
+            <h2 id="overview">{t.trip.overview}</h2>
             <p className="trip-lede">{trip.description}</p>
           </section>
 
           <section aria-labelledby="gallery">
-            <h2 id="gallery">Gallery</h2>
+            <h2 id="gallery">{t.trip.gallery}</h2>
             <TripGallery photos={photos} tripTitle={trip.title} />
           </section>
 
           {trip.elevationProfile.length > 1 && (
             <section aria-labelledby="elevation">
-              <h2 id="elevation">Elevation &amp; distance</h2>
+              <h2 id="elevation">{t.trip.elevation}</h2>
               <ElevationProfile points={trip.elevationProfile} days={trip.itinerary} />
             </section>
           )}
 
           <section aria-labelledby="itinerary">
-            <h2 id="itinerary">Day-by-day itinerary</h2>
+            <h2 id="itinerary">{t.trip.itinerary}</h2>
             <ol className="timeline">
               {trip.itinerary.map((d, i) => (
                 <li key={i}>
@@ -107,9 +110,9 @@ export default async function TripDetail({ type, params }: { type: ActivityType;
                   <h3>{d.title}</h3>
                   {d.distanceKm !== undefined && (
                     <p className="timeline-stats">
-                      <span>{d.distanceKm} km</span>
+                      <span dir="ltr">{d.distanceKm} km</span>
                       {d.hours && <span>{d.hours}</span>}
-                      {d.gainM !== undefined && d.lossM !== undefined && <span>+{d.gainM} m / −{d.lossM} m</span>}
+                      {d.gainM !== undefined && d.lossM !== undefined && <span dir="ltr">+{d.gainM} m / −{d.lossM} m</span>}
                     </p>
                   )}
                   {d.details && <p>{d.details}</p>}
@@ -120,13 +123,13 @@ export default async function TripDetail({ type, params }: { type: ActivityType;
 
           <section aria-labelledby="included" className="incl-grid">
             <div>
-              <h2 id="included">What&apos;s included</h2>
+              <h2 id="included">{t.trip.included}</h2>
               <ul className="incl-list">
                 {trip.inclusions.map((x) => <li key={x}><CheckIcon />{x}</li>)}
               </ul>
             </div>
             <div>
-              <h2>Not included</h2>
+              <h2>{t.trip.notIncluded}</h2>
               <ul className="incl-list excl">
                 {trip.exclusions.map((x) => <li key={x}><CrossIcon />{x}</li>)}
               </ul>
@@ -134,32 +137,32 @@ export default async function TripDetail({ type, params }: { type: ActivityType;
           </section>
         </div>
 
-        <aside className="booking-card" aria-label="Book this trip">
+        <aside className="booking-card" aria-label={t.trip.book}>
           <p className="booking-quote">
-            Price on request
-            <small>Quoted for your dates and group size</small>
+            {t.trip.priceOnRequest}
+            <small>{t.trip.priceNote}</small>
           </p>
           <dl className="booking-facts">
             {details.map((f) => (
               <div key={f.label}><dt>{f.label}</dt><dd>{f.value}</dd></div>
             ))}
           </dl>
-          <Link href="/plan-your-trip" className="btn primary block">Enquire about this trip</Link>
+          <Link href="/plan-your-trip" className="btn primary block">{t.trip.enquire}</Link>
           <a href={contact.whatsapp} target="_blank" rel="noopener noreferrer" className="btn outline block">
-            <WhatsAppIcon /> Ask on WhatsApp
+            <WhatsAppIcon /> {t.trip.askWhatsApp}
           </a>
-          <p className="booking-note">Dates and itinerary can be tailored to your group.</p>
+          <p className="booking-note">{t.trip.tailored}</p>
         </aside>
       </div>
 
       {related.length > 0 && (
         <section className="section section-tint" aria-labelledby="related">
           <div className="section-heading">
-            <p className="kicker">More {activity.name.toLowerCase()}</p>
-            <h2 id="related">You might also like</h2>
+            <p className="kicker">{format(t.trip.more, { name: locale === "en" ? activity.name.toLowerCase() : activity.name })}</p>
+            <h2 id="related">{t.trip.related}</h2>
           </div>
           <div className="trip-grid">
-            {related.map((t) => <TripCard key={t.id} trip={t} />)}
+            {related.map((r) => <TripCard key={r.id} trip={r} />)}
           </div>
         </section>
       )}
@@ -172,7 +175,8 @@ export default async function TripDetail({ type, params }: { type: ActivityType;
           "@type": "TouristTrip",
           name: trip.title,
           description: trip.description,
-          url: `${SITE_URL}${tripPath(trip)}`,
+          url: absoluteUrl(localePath(locale, tripPath(trip))),
+          inLanguage: LANGUAGES[locale].tag,
           image: photos.map((p) => absoluteUrl(sanityImageUrl(p.url, SHARE_IMAGE_WIDTH))),
           touristType: activity.name,
           itinerary: {

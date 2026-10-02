@@ -29,6 +29,19 @@ Editors sign in with the account they were invited with (manage members at sanit
 
 Published changes appear on the site immediately (via the webhook below), or within a minute at most.
 
+### Translations (French and Hebrew)
+
+The site is published in English (`/about`), French (`/fr/about`) and Hebrew (`/he/about`, right to left). Visitors switch with the language links in the header, the mobile menu and the footer.
+
+English is the original. In the Studio, open **Français** or **עברית** at the bottom of the sidebar, pick the trip or page, translate the text and **Publish**:
+
+- The first time a translation is opened it's filled in with a copy of the English content, ready to translate.
+- Until a translation is published, and for any field left empty, that language's pages show the English text.
+- Web addresses, categories, difficulty, walking figures, trail points, map positions, featured trips and contact details are set on the English document only; translations show them read-only.
+- Deleting a translation puts the English text back on that language's pages.
+
+Menu labels, buttons and other interface text that isn't in the Studio is in `lib/dictionaries/` (`en.ts`, `fr.ts`, `he.ts`).
+
 ### Live preview (Presentation)
 
 Open **Live preview** in the Studio's top bar to edit beside a live view of the site. Unpublished drafts show in the preview,
@@ -51,8 +64,10 @@ on every create, update or delete, so published changes go live straight away.
 - `sanity.config.ts`: Studio config (served at `/studio` by `app/studio/[[...tool]]/page.tsx`)
 - `sanity/schemaTypes/`: content model; `sanity/structure.ts` sets up the Studio sidebar
 - `sanity/presentation.ts`: which pages each document appears on in Live preview
-- `lib/content.ts`: GROQ queries used by the pages
-- `app/(site)/`: the website routes, with header/footer in `app/(site)/layout.tsx`
+- `lib/content.ts`: GROQ queries used by the pages, including the English fallback for translations
+- `app/[lang]/`: the website routes, with the root layout, header and footer in `app/[lang]/layout.tsx`
+- `proxy.ts`: serves English pages without a language prefix (`/about` → `app/[lang]` with `lang = "en"`)
+- `lib/i18n.ts`: the languages and URL helpers; `lib/dictionaries/`: interface text per language
 
 ## Tech Stack
 

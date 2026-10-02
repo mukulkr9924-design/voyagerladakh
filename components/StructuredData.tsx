@@ -1,6 +1,7 @@
 import JsonLd from "@/components/JsonLd";
 import { SITE_NAME, SITE_URL } from "@/lib/activities";
 import { getSettings } from "@/lib/content";
+import { LANGUAGES, LOCALES } from "@/lib/i18n";
 
 export default async function StructuredData() {
   const { contact: CONTACT, organizationDescription } = await getSettings();
@@ -31,6 +32,7 @@ export default async function StructuredData() {
         areaServed: { "@type": "Place", name: "Ladakh, India" },
         sameAs: CONTACT.instagram ? [CONTACT.instagram] : [],
         openingHours: CONTACT.openingHours,
+        knowsLanguage: LOCALES.map((l) => LANGUAGES[l].tag),
       }}
     />
   );

@@ -1,12 +1,15 @@
 import Image from "next/image";
-import Link from "next/link";
+import LanguageMenu from "@/components/LanguageMenu";
+import Link from "@/components/LocaleLink";
 import MobileMenu from "@/components/MobileMenu";
 import { ActivityIcon } from "@/components/Icons";
 import { tripPath } from "@/lib/activities";
 import { getActivities, getSettings, getTrips } from "@/lib/content";
+import { format } from "@/lib/i18n";
+import { getI18n } from "@/lib/locale";
 
 export default async function Header() {
-  const [activities, trips, { contact }] = await Promise.all([getActivities(), getTrips(), getSettings()]);
+  const [activities, trips, { contact }, { locale, t }] = await Promise.all([getActivities(), getTrips(), getSettings(), getI18n()]);
   const nav = activities.map((a) => ({
     href: `/${a.type}`,
     label: a.name,
@@ -21,7 +24,7 @@ export default async function Header() {
           {/* Above the fold on every page, so preload it (`preload` replaces `priority` in Next 16). */}
           <Image
             src="/voyager-ladakh-horizontal.svg"
-            alt="Voyager Ladakh – home"
+            alt={t.common.logoAlt}
             width={467}
             height={140}
             className="brand-logo"
@@ -29,7 +32,7 @@ export default async function Header() {
           />
         </Link>
 
-        <nav className="main-nav" aria-label="Main">
+        <nav className="main-nav" aria-label={t.nav.main}>
           <ul>
             {nav.map((item) => (
               <li key={item.href} className="nav-item">
@@ -50,25 +53,29 @@ export default async function Header() {
                         </li>
                       ))}
                     </ul>
-                    <Link href={item.href} className="nav-dropdown-all">View all {item.label.toLowerCase()} →</Link>
+                    <Link href={item.href} className="nav-dropdown-all">
+                      {format(t.nav.viewAll, { name: locale === "en" ? item.label.toLowerCase() : item.label })}
+                    </Link>
                   </div>
                 </div>
               </li>
             ))}
-            <li><Link href="/about" className="nav-link">About</Link></li>
-            <li><Link href="/contact" className="nav-link">Contact</Link></li>
+            <li><Link href="/about" className="nav-link">{t.common.about}</Link></li>
+            <li><Link href="/contact" className="nav-link">{t.common.contact}</Link></li>
           </ul>
         </nav>
 
-        <Link href="/plan-your-trip" className="btn primary header-cta">Plan your trip</Link>
+        <LanguageMenu />
+
+        <Link href="/plan-your-trip" className="btn primary header-cta">{t.common.planYourTrip}</Link>
 
         <MobileMenu
           phone={contact.phone}
           phoneHref={contact.phoneHref}
           links={[
             ...nav.map(({ href, label }) => ({ href, label })),
-            { href: "/about", label: "About" },
-            { href: "/contact", label: "Contact" },
+            { href: "/about", label: t.common.about },
+            { href: "/contact", label: t.common.contact },
           ]}
         />
       </div>

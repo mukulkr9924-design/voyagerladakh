@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useI18n } from "@/components/I18nProvider";
+import { format, LANGUAGES, plural } from "@/lib/i18n";
 import type { DayPlan, Waypoint } from "@/lib/trips";
 
 const HEIGHT = 300;
 const PAD = { top: 44, right: 16, bottom: 36, left: 52 };
-
-const fmt = (n: number) => n.toLocaleString("en-IN");
 
 type Day = { label: string; title: string; from: number; to: number; plan: DayPlan };
 
@@ -25,8 +25,6 @@ function niceTicks(min: number, max: number, maxCount: number, steps: number[]) 
   return ticks;
 }
 
-const KIND_LABEL: Record<Waypoint["kind"], string> = { pass: "Pass", village: "Village", camp: "Camp" };
-
 function Marker({ kind, x, y }: { kind: Waypoint["kind"]; x: number; y: number }) {
   if (kind === "pass") return <path d={`M${x},${y - 7}L${x + 6},${y + 4}L${x - 6},${y + 4}Z`} className="elev-mk-pass" />;
   if (kind === "camp") return <rect x={x - 4} y={y - 4} width={8} height={8} rx={1.5} className="elev-mk-camp" />;
@@ -34,6 +32,9 @@ function Marker({ kind, x, y }: { kind: Waypoint["kind"]; x: number; y: number }
 }
 
 export default function ElevationProfile({ points, days }: { points: Waypoint[]; days: DayPlan[] }) {
+  const { locale, t } = useI18n();
+  const fmt = (n: number) => n.toLocaleString(LANGUAGES[locale].tag);
+  const kindLabel = t.elevation.kinds;
   const wrapRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(720);
   const [hoverKm, setHoverKm] = useState<number | null>(null);
@@ -57,7 +58,8 @@ export default function ElevationProfile({ points, days }: { points: Waypoint[];
         const from = walkDays.slice(0, i).reduce((s, p) => s + (p.distanceKm ?? 0), 0);
         // The last day always runs to the end of the trail, absorbing rounding.
         const to = i === walkDays.length - 1 ? totalKm : Math.min(from + (d.distanceKm ?? 0), totalKm);
-        return { label: d.day.replace(/^Day 0?/, "Day "), title: d.title, from, to, plan: d };
+        // "Day 01" → "Day 1", whatever the word for "day".
+        return { label: d.day.replace(/^(\D*?)0+(?=\d)/, "$1"), title: d.title, from, to, plan: d };
       }),
     [walkDays, totalKm]
   );
@@ -116,7 +118,7 @@ export default function ElevationProfile({ points, days }: { points: Waypoint[];
           distance: `${fmt(Math.round(dayRanges.reduce((s, d) => s + (d.plan.distanceKm ?? 0), 0)))} km`,
           gain: days.reduce((s, d) => s + (d.gainM ?? 0), 0),
           loss: days.reduce((s, d) => s + (d.lossM ?? 0), 0),
-          time: `${walkDays.length} days`,
+          time: plural(locale, walkDays.length, t.elevation.days),
           high: highest,
         }
       : (() => {
@@ -151,9 +153,9 @@ export default function ElevationProfile({ points, days }: { points: Waypoint[];
 
   return (
     <div className="elev">
-      <div className="elev-tabs" role="group" aria-label="Show elevation for">
+      <div className="elev-tabs" role="group" aria-label={t.elevation.showFor}>
         <button type="button" aria-pressed={activeDay === null} onClick={() => setActiveDay(null)}>
-          Full trek
+          {t.elevation.fullTrek}
         </button>
         {dayRanges.map((d, i) => (
           <button key={d.label} type="button" aria-pressed={activeDay === i} onClick={() => setActiveDay(i)}>
@@ -163,17 +165,24 @@ export default function ElevationProfile({ points, days }: { points: Waypoint[];
       </div>
 
       <dl className="elev-stats">
-        <div><dt>Distance</dt><dd>{summary.distance}</dd></div>
-        <div><dt>{activeDay === null ? "Trekking days" : "Walking time"}</dt><dd>{summary.time}</dd></div>
-        <div><dt>Ascent / descent</dt><dd><span>+{fmt(summary.gain)} m</span> <span>/ −{fmt(summary.loss)} m</span></dd></div>
-        <div><dt>High point</dt><dd>{fmt(summary.high.altitude)} m <small>{summary.high.name}</small></dd></div>
+        <div><dt>{t.elevation.distance}</dt><dd><span dir="ltr">{summary.distance}</span></dd></div>
+        <div><dt>{activeDay === null ? t.elevation.trekkingDays : t.elevation.walkingTime}</dt><dd>{summary.time}</dd></div>
+        <div><dt>{t.elevation.ascentDescent}</dt><dd><span dir="ltr">+{fmt(summary.gain)} m</span> <span dir="ltr">/ −{fmt(summary.loss)} m</span></dd></div>
+        <div><dt>{t.elevation.highPoint}</dt><dd><span dir="ltr">{fmt(summary.high.altitude)} m</span> <small>{summary.high.name}</small></dd></div>
       </dl>
 
-      <div className="elev-plot" ref={wrapRef}>
+      {/* A chart: distance runs left to right in every language. */}
+      <div className="elev-plot" ref={wrapRef} dir="ltr">
         <svg
           viewBox={`0 0 ${width} ${HEIGHT}`}
           role="img"
-          aria-label={`Elevation profile: ${fmt(Math.round(totalKm))} km from ${points[0].name} to ${points[points.length - 1].name}, highest point ${highest.name} at ${fmt(highest.altitude)} m. Use left and right arrow keys to step through waypoints.`}
+          aria-label={format(t.elevation.chart, {
+            km: fmt(Math.round(totalKm)),
+            from: points[0].name,
+            to: points[points.length - 1].name,
+            high: highest.name,
+            altitude: fmt(highest.altitude),
+          })}
           tabIndex={0}
           onPointerMove={(e) => setHoverKm(kmFromPointer(e.clientX, e.currentTarget))}
           onPointerDown={(e) => setHoverKm(kmFromPointer(e.clientX, e.currentTarget))}
@@ -206,7 +215,7 @@ export default function ElevationProfile({ points, days }: { points: Waypoint[];
               />
               {x(d.to) - x(d.from) >= 16 && (
                 <text x={(x(d.from) + x(d.to)) / 2} y={PAD.top - 12} textAnchor="middle" className="elev-daylabel">
-                  {x(d.to) - x(d.from) >= 60 ? d.label : d.label.replace("Day ", "")}
+                  {x(d.to) - x(d.from) >= 60 ? d.label : d.label.replace(/^\D+/, "")}
                 </text>
               )}
               {i > 0 && <line x1={x(d.from)} x2={x(d.from)} y1={PAD.top - 28} y2={PAD.top + plotH} className="elev-divider" />}
@@ -228,7 +237,7 @@ export default function ElevationProfile({ points, days }: { points: Waypoint[];
             </text>
           ))}
           <text x={12} y={PAD.top + plotH / 2} transform={`rotate(-90 12 ${PAD.top + plotH / 2})`} textAnchor="middle" className="elev-axis">
-            metres
+            {t.elevation.metres}
           </text>
 
           {/* Profile: dimmed everywhere when a day is selected, full strength inside it */}
@@ -272,7 +281,7 @@ export default function ElevationProfile({ points, days }: { points: Waypoint[];
         {cursorKm !== null && cursorAlt !== null && (
           <div className="elev-tip" style={{ left: tipLeft }} aria-live="polite">
             <strong>{snapped ? snapped.name : `${fmt(Math.round(cursorAlt))} m`}</strong>
-            {snapped && <span>{fmt(snapped.altitude)} m · {KIND_LABEL[snapped.kind].toLowerCase()}</span>}
+            {snapped && <span>{fmt(snapped.altitude)} m · {kindLabel[snapped.kind].toLocaleLowerCase(LANGUAGES[locale].tag)}</span>}
             <span>
               {cursorKm.toFixed(1)} km{cursorDay !== null && cursorDay >= 0 ? ` · ${dayRanges[cursorDay].label}` : ""}
             </span>
@@ -284,24 +293,24 @@ export default function ElevationProfile({ points, days }: { points: Waypoint[];
         {kinds.map((k) => (
           <span key={k}>
             <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><Marker kind={k} x={7} y={k === "pass" ? 8 : 7} /></svg>
-            {KIND_LABEL[k]}
+            {kindLabel[k]}
           </span>
         ))}
-        <span className="elev-note">Altitudes between waypoints are approximate.</span>
+        <span className="elev-note">{t.elevation.approximate}</span>
       </div>
 
       <details className="elev-table">
-        <summary>View waypoints as a table</summary>
+        <summary>{t.elevation.viewTable}</summary>
         <table>
           <thead>
-            <tr><th scope="col">Waypoint</th><th scope="col">Distance</th><th scope="col">Altitude</th></tr>
+            <tr><th scope="col">{t.elevation.waypoint}</th><th scope="col">{t.elevation.distance}</th><th scope="col">{t.elevation.altitude}</th></tr>
           </thead>
           <tbody>
             {points.map((p) => (
               <tr key={p.name}>
-                <th scope="row">{p.name}{p.kind === "village" ? "" : ` (${p.kind})`}</th>
-                <td>{p.km.toFixed(1)} km</td>
-                <td>{fmt(p.altitude)} m</td>
+                <th scope="row">{p.name}{p.kind === "village" ? "" : ` (${kindLabel[p.kind].toLocaleLowerCase(LANGUAGES[locale].tag)})`}</th>
+                <td><span dir="ltr">{p.km.toFixed(1)} km</span></td>
+                <td><span dir="ltr">{fmt(p.altitude)} m</span></td>
               </tr>
             ))}
           </tbody>

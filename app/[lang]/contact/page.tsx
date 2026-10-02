@@ -4,24 +4,25 @@ import Image from "next/image";
 import EnquiryForm from "@/components/EnquiryForm";
 import { InstagramIcon, MailIcon, PhoneIcon, PinIcon, WhatsAppIcon } from "@/components/Icons";
 import PageHeader from "@/components/PageHeader";
-import { SITE_NAME, socialFor } from "@/lib/activities";
+import { pageMeta, SITE_NAME } from "@/lib/activities";
 import { getContactPage, getSettings } from "@/lib/content";
+import { format } from "@/lib/i18n";
+import { getI18n, getLocale } from "@/lib/locale";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { seo, header, bannerImage } = stegaClean(await getContactPage());
+  const [locale, { seo, header, bannerImage }] = stegaClean(await Promise.all([getLocale(), getContactPage()]));
   const title = seo?.title ?? header.title;
   const description = seo?.description ?? header.intro ?? "";
   return {
     title,
     description,
     keywords: seo?.keywords,
-    alternates: { canonical: "/contact" },
-    ...socialFor("/contact", `${title} | ${SITE_NAME}`, description, bannerImage),
+    ...pageMeta(locale, "/contact", `${title} | ${SITE_NAME}`, description, bannerImage),
   };
 }
 
 export default async function ContactPage() {
-  const [page, { contact: CONTACT }] = await Promise.all([getContactPage(), getSettings()]);
+  const [page, { contact: CONTACT }, { t }] = await Promise.all([getContactPage(), getSettings(), getI18n()]);
   const { bannerImage } = page;
 
   return (
@@ -30,7 +31,7 @@ export default async function ContactPage() {
         kicker={page.header.kicker ?? ""}
         title={page.header.title}
         intro={page.header.intro}
-        crumbs={[{ name: "Contact", href: "/contact" }]}
+        crumbs={[{ name: t.common.contact, href: "/contact" }]}
       />
       <section className="section section-flush-top">
         {bannerImage && (
@@ -49,24 +50,24 @@ export default async function ContactPage() {
           <div className="contact-cards">
             <a className="contact-card" href={CONTACT.phoneHref}>
               <PhoneIcon />
-              <span><strong>Call {CONTACT.person}</strong>{CONTACT.phone}</span>
+              <span><strong>{format(t.contact.call, { name: CONTACT.person })}</strong><bdi dir="ltr">{CONTACT.phone}</bdi></span>
             </a>
             <a className="contact-card" href={CONTACT.whatsapp} target="_blank" rel="noopener noreferrer">
               <WhatsAppIcon />
-              <span><strong>WhatsApp</strong>Chat with us instantly</span>
+              <span><strong>{t.contact.whatsapp}</strong>{t.contact.whatsappText}</span>
             </a>
             <a className="contact-card" href={`mailto:${CONTACT.email}`}>
               <MailIcon />
-              <span><strong>Email</strong>{CONTACT.email}</span>
+              <span><strong>{t.contact.email}</strong>{CONTACT.email}</span>
             </a>
             <a className="contact-card" href={CONTACT.mapUrl} target="_blank" rel="noopener noreferrer">
               <PinIcon />
-              <span><strong>Visit</strong>{CONTACT.address[0]}, {CONTACT.address[1]}</span>
+              <span><strong>{t.contact.visit}</strong>{CONTACT.address[0]}, {CONTACT.address[1]}</span>
             </a>
             {CONTACT.instagram && (
               <a className="contact-card" href={CONTACT.instagram} target="_blank" rel="noopener noreferrer">
                 <InstagramIcon />
-                <span><strong>Instagram</strong>Photos from the trail</span>
+                <span><strong>{t.contact.instagram}</strong>{t.contact.instagramText}</span>
               </a>
             )}
           </div>

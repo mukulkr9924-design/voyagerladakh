@@ -1,4 +1,5 @@
 import { defineArrayMember, defineField, defineType } from "sanity";
+import { isTranslation } from "./language";
 
 const altField = defineField({
   name: "alt",
@@ -75,10 +76,11 @@ export const dayPlan = defineType({
     defineField({ name: "day", type: "string", description: 'e.g. "Day 01"', validation: (r) => r.required() }),
     defineField({ name: "title", type: "string", validation: (r) => r.required() }),
     defineField({ name: "details", type: "text", rows: 4 }),
-    defineField({ name: "distanceKm", title: "Distance (km)", type: "number", fieldset: "stats" }),
+    // Figures are entered once, on the English trip.
+    defineField({ name: "distanceKm", title: "Distance (km)", type: "number", fieldset: "stats", readOnly: isTranslation }),
     defineField({ name: "hours", title: "Walking time", type: "string", description: 'e.g. "3–4 hrs"', fieldset: "stats" }),
-    defineField({ name: "gainM", title: "Ascent (m)", type: "number", fieldset: "stats" }),
-    defineField({ name: "lossM", title: "Descent (m)", type: "number", fieldset: "stats" }),
+    defineField({ name: "gainM", title: "Ascent (m)", type: "number", fieldset: "stats", readOnly: isTranslation }),
+    defineField({ name: "lossM", title: "Descent (m)", type: "number", fieldset: "stats", readOnly: isTranslation }),
   ],
   preview: { select: { day: "day", title: "title" }, prepare: ({ day, title }) => ({ title: `${day ?? ""} · ${title ?? ""}` }) },
 });
@@ -89,11 +91,12 @@ export const waypoint = defineType({
   type: "object",
   fields: [
     defineField({ name: "name", type: "string", validation: (r) => r.required() }),
-    defineField({ name: "km", title: "Km from trailhead", type: "number", validation: (r) => r.required().min(0) }),
-    defineField({ name: "altitude", title: "Altitude (m)", type: "number", validation: (r) => r.required() }),
+    defineField({ name: "km", title: "Km from trailhead", type: "number", readOnly: isTranslation, validation: (r) => r.required().min(0) }),
+    defineField({ name: "altitude", title: "Altitude (m)", type: "number", readOnly: isTranslation, validation: (r) => r.required() }),
     defineField({
       name: "kind",
       type: "string",
+      readOnly: isTranslation,
       options: { list: ["village", "camp", "pass"], layout: "radio", direction: "horizontal" },
       initialValue: "village",
       validation: (r) => r.required(),
@@ -144,13 +147,15 @@ export const mapStop = defineType({
     defineField({ name: "tagline", type: "string" }),
     defineField({ name: "desc", title: "Description", type: "text", rows: 3 }),
     defineField({ name: "highlights", type: "array", of: [defineArrayMember({ type: "string" })] }),
-    defineField({ name: "x", type: "number", fieldset: "position", description: "0 (west) – 1000 (east)", validation: (r) => r.required().min(0).max(1000) }),
-    defineField({ name: "y", type: "number", fieldset: "position", description: "0 (north) – 600 (south)", validation: (r) => r.required().min(0).max(600) }),
+    // Positions are set once, on the English home page.
+    defineField({ name: "x", type: "number", fieldset: "position", readOnly: isTranslation, description: "0 (west) – 1000 (east)", validation: (r) => r.required().min(0).max(1000) }),
+    defineField({ name: "y", type: "number", fieldset: "position", readOnly: isTranslation, description: "0 (north) – 600 (south)", validation: (r) => r.required().min(0).max(600) }),
     defineField({
       name: "label",
       title: "Label side",
       type: "string",
       fieldset: "position",
+      readOnly: isTranslation,
       options: { list: ["top", "bottom", "left", "right"] },
       initialValue: "bottom",
       validation: (r) => r.required(),

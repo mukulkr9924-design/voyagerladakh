@@ -1,8 +1,10 @@
-import Link from "next/link";
 import HeroSlideshow from "@/components/HeroSlideshow";
+import Link from "@/components/LocaleLink";
 import type { HomePage } from "@/lib/content";
+import { getI18n } from "@/lib/locale";
 
-export default function Hero({ home, tripCount, categoryCount }: { home: HomePage; tripCount: number; categoryCount: number }) {
+export default async function Hero({ home, tripCount, categoryCount }: { home: HomePage; tripCount: number; categoryCount: number }) {
+  const { t } = await getI18n();
   // Stats can include live counts, written as {trips} and {categories} in the Studio.
   const fill = (value: string) => value.replace(/\{trips\}/g, String(tripCount)).replace(/\{categories\}/g, String(categoryCount));
 
@@ -17,8 +19,8 @@ export default function Hero({ home, tripCount, categoryCount }: { home: HomePag
         </h1>
         {home.heroLede && <p className="hero-lede">{home.heroLede}</p>}
         <div className="hero-actions">
-          <Link className="btn light" href="/plan-your-trip">Plan your trip</Link>
-          <Link className="btn ghost" href="#journeys">Explore journeys</Link>
+          <Link className="btn light" href="/plan-your-trip">{t.common.planYourTrip}</Link>
+          <Link className="btn ghost" href="#journeys">{t.home.exploreJourneys}</Link>
         </div>
       </div>
       {home.heroStats.length > 0 && (

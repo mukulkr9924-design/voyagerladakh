@@ -3,24 +3,24 @@ import { stegaClean } from "next-sanity";
 import Image from "next/image";
 import CtaBand from "@/components/CtaBand";
 import PageHeader from "@/components/PageHeader";
-import { SITE_NAME, socialFor } from "@/lib/activities";
+import { pageMeta, SITE_NAME } from "@/lib/activities";
 import { getAboutPage } from "@/lib/content";
+import { getI18n, getLocale } from "@/lib/locale";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { seo, header, bannerImage } = stegaClean(await getAboutPage());
+  const [locale, { seo, header, bannerImage }] = stegaClean(await Promise.all([getLocale(), getAboutPage()]));
   const title = seo?.title ?? header.title;
   const description = seo?.description ?? header.intro ?? "";
   return {
     title,
     description,
     keywords: seo?.keywords,
-    alternates: { canonical: "/about" },
-    ...socialFor("/about", `${title} | ${SITE_NAME}`, description, bannerImage),
+    ...pageMeta(locale, "/about", `${title} | ${SITE_NAME}`, description, bannerImage),
   };
 }
 
 export default async function AboutPage() {
-  const page = await getAboutPage();
+  const [page, { t }] = await Promise.all([getAboutPage(), getI18n()]);
   const { bannerImage, founderImage } = page;
 
   return (
@@ -29,7 +29,7 @@ export default async function AboutPage() {
         kicker={page.header.kicker ?? ""}
         title={page.header.title}
         intro={page.header.intro}
-        crumbs={[{ name: "About", href: "/about" }]}
+        crumbs={[{ name: t.common.about, href: "/about" }]}
       />
       <section className="section section-flush-top">
         <div className="prose-split">

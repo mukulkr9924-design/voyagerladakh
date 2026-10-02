@@ -1,6 +1,7 @@
 import { orderRankField } from "@sanity/orderable-document-list";
 import { defineArrayMember, defineField, defineType } from "sanity";
 import { ACTIVITY_TYPES, activityLabels, DIFFICULTIES } from "@/lib/trips";
+import { isTranslation, languageField, titleWithLanguage } from "./language";
 
 export const trip = defineType({
   name: "trip",
@@ -13,13 +14,15 @@ export const trip = defineType({
     { name: "included", title: "Included" },
   ],
   fields: [
+    languageField("basics"),
     defineField({ name: "title", type: "string", group: "basics", validation: (r) => r.required() }),
     defineField({
       name: "slug",
       title: "Web address",
       type: "slug",
       group: "basics",
-      description: "The last part of the trip's URL. Click Generate after typing the title. Changing it breaks old links.",
+      readOnly: isTranslation,
+      description: "The last part of the trip's URL, in every language. Click Generate after typing the title. Changing it breaks old links.",
       options: { source: "title", maxLength: 80 },
       validation: (r) => r.required(),
     }),
@@ -28,6 +31,7 @@ export const trip = defineType({
       title: "Category",
       type: "string",
       group: "basics",
+      readOnly: isTranslation,
       options: { list: ACTIVITY_TYPES.map((value) => ({ value, title: activityLabels[value] })), layout: "radio" },
       validation: (r) => r.required(),
     }),
@@ -44,6 +48,8 @@ export const trip = defineType({
       name: "difficulty",
       type: "string",
       group: "basics",
+      readOnly: isTranslation,
+      description: "Translated automatically on French and Hebrew pages.",
       options: { list: [...DIFFICULTIES], layout: "radio", direction: "horizontal" },
       validation: (r) => r.required(),
     }),
@@ -90,10 +96,10 @@ export const trip = defineType({
   ],
   orderings: [{ title: "Website order", name: "orderRank", by: [{ field: "orderRank", direction: "asc" }] }],
   preview: {
-    select: { title: "title", duration: "duration", type: "activityType", media: "heroImage" },
-    prepare: ({ title, duration, type, media }) => ({
+    select: { title: "title", duration: "duration", type: "activityType", media: "heroImage", language: "language" },
+    prepare: ({ title, duration, type, media, language }) => ({
       title,
-      subtitle: [activityLabels[type as keyof typeof activityLabels], duration].filter(Boolean).join(" · "),
+      subtitle: titleWithLanguage([activityLabels[type as keyof typeof activityLabels], duration].filter(Boolean).join(" · "), language),
       media,
     }),
   },

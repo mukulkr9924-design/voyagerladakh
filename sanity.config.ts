@@ -10,11 +10,14 @@ import { ACTIVITY_TYPES, activityLabels } from "@/lib/trips";
 import { apiVersion, dataset, projectId } from "@/sanity/env";
 import { schemaTypes, SINGLETONS } from "@/sanity/schemaTypes";
 import { presentation } from "@/sanity/presentation";
-import { structure, tripTemplateId } from "@/sanity/structure";
+import { structure, translationTemplateId, tripTemplateId } from "@/sanity/structure";
+import { TRANSLATABLE_TYPES, translationLocale } from "@/sanity/translations";
 
 // Category pages map to fixed routes, so editors can change them but not add or remove them.
 const FIXED_TYPES = new Set([...SINGLETONS, "activity"]);
 const FIXED_ACTIONS = new Set(["publish", "discardChanges", "restore"]);
+// A translation can also be deleted, which puts the English text back on that language's pages.
+const TRANSLATION_ACTIONS = new Set([...FIXED_ACTIONS, "unpublish", "delete"]);
 
 export default defineConfig({
   name: "default",
@@ -40,13 +43,34 @@ export default defineConfig({
           return { activityType: type, orderRank };
         },
       })),
+      // A new translation starts as a copy of the English document (opened from the language sections).
+      ...TRANSLATABLE_TYPES.map((schemaType) => ({
+        id: translationTemplateId(schemaType),
+        title: "Translation",
+        schemaType,
+        parameters: [
+          { name: "id", type: "string" },
+          { name: "locale", type: "string" },
+        ],
+        value: async ({ id, locale }: { id: string; locale: string }, { getClient }: InitialValueResolverContext) => {
+          const english: Record<string, unknown> | null = await getClient({ apiVersion }).fetch(
+            `coalesce(*[_id == $id][0], *[_id == "drafts." + $id][0])`,
+            { id },
+          );
+          const content = { ...english };
+          for (const key of ["_id", "_rev", "_type", "_createdAt", "_updatedAt", "orderRank"]) delete content[key];
+          return { ...content, language: locale };
+        },
+      })),
     ],
   },
 
   document: {
     // Only trips appear in the global "Create" menu.
     newDocumentOptions: (prev) => prev.filter((item) => item.templateId.startsWith("trip-")),
-    actions: (prev, { schemaType }) =>
-      FIXED_TYPES.has(schemaType) ? prev.filter(({ action }) => action && FIXED_ACTIONS.has(action)) : prev,
+    actions: (prev, { schemaType, documentId }) => {
+      if (translationLocale(documentId)) return prev.filter(({ action }) => action && TRANSLATION_ACTIONS.has(action));
+      return FIXED_TYPES.has(schemaType) ? prev.filter(({ action }) => action && FIXED_ACTIONS.has(action)) : prev;
+    },
   },
 });

@@ -2,12 +2,14 @@ import FloatingWhatsApp from "@/components/FloatingWhatsApp";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import StructuredData from "@/components/StructuredData";
+import { getI18n } from "@/lib/locale";
 
-/** Header, footer and site-wide extras around a page. Also used by the 404 page, which renders outside app/(site). */
-export default function SiteChrome({ children }: { children: React.ReactNode }) {
+/** Header, footer and site-wide extras around every page. */
+export default async function SiteChrome({ children }: { children: React.ReactNode }) {
+  const { t } = await getI18n();
   return (
     <>
-      <a href="#main" className="skip-link">Skip to content</a>
+      <a href="#main" className="skip-link">{t.common.skipToContent}</a>
       <StructuredData />
       <Header />
       <main id="main">{children}</main>

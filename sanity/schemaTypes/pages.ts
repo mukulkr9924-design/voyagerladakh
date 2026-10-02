@@ -4,6 +4,13 @@ import { HomeIcon } from "@sanity/icons/Home";
 import { TagIcon } from "@sanity/icons/Tag";
 import { defineArrayMember, defineField, defineType } from "sanity";
 import { ACTIVITY_TYPES, activityLabels } from "@/lib/trips";
+import { isTranslation, languageField, titleWithLanguage } from "./language";
+
+/** Preview for a one-off page, naming its language when it's a translation. */
+const pagePreview = (title: string) => ({
+  select: { language: "language" },
+  prepare: ({ language }: { language?: string }) => ({ title: titleWithLanguage(title, language) }),
+});
 
 const seoField = defineField({ name: "seo", title: "Search engines & sharing", type: "seo" });
 const headerField = defineField({ name: "header", type: "pageHeader", validation: (r) => r.required() });
@@ -14,6 +21,7 @@ export const activity = defineType({
   type: "document",
   icon: TagIcon,
   fields: [
+    languageField(),
     defineField({
       name: "type",
       type: "string",
@@ -29,7 +37,10 @@ export const activity = defineType({
     defineField({ name: "metaDescription", title: "Google description", type: "text", rows: 3, validation: (r) => r.max(170).warning() }),
     defineField({ name: "keywords", type: "array", of: [defineArrayMember({ type: "string" })], options: { layout: "tags" } }),
   ],
-  preview: { select: { title: "name", subtitle: "heading" } },
+  preview: {
+    select: { title: "name", subtitle: "heading", language: "language" },
+    prepare: ({ title, subtitle, language }) => ({ title: titleWithLanguage(title, language), subtitle }),
+  },
 });
 
 export const siteSettings = defineType({
@@ -43,18 +54,19 @@ export const siteSettings = defineType({
     { name: "text", title: "Footer & banners" },
   ],
   fields: [
-    defineField({ name: "contactPerson", type: "string", group: "contact" }),
-    defineField({ name: "phone", type: "string", group: "contact", description: 'With country code, e.g. "+91 9541379356".', validation: (r) => r.required() }),
-    defineField({ name: "email", type: "string", group: "contact", validation: (r) => r.required().email() }),
-    defineField({ name: "whatsapp", title: "WhatsApp link", type: "url", group: "contact", validation: (r) => r.required() }),
-    defineField({ name: "instagram", title: "Instagram link", type: "url", group: "contact" }),
-    defineField({ name: "streetAddress", type: "string", group: "contact", validation: (r) => r.required() }),
+    languageField("contact"),
+    defineField({ name: "contactPerson", type: "string", group: "contact", readOnly: isTranslation }),
+    defineField({ name: "phone", type: "string", group: "contact", readOnly: isTranslation, description: 'With country code, e.g. "+91 9541379356".', validation: (r) => r.required() }),
+    defineField({ name: "email", type: "string", group: "contact", readOnly: isTranslation, validation: (r) => r.required().email() }),
+    defineField({ name: "whatsapp", title: "WhatsApp link", type: "url", group: "contact", readOnly: isTranslation, validation: (r) => r.required() }),
+    defineField({ name: "instagram", title: "Instagram link", type: "url", group: "contact", readOnly: isTranslation }),
+    defineField({ name: "streetAddress", type: "string", group: "contact", readOnly: isTranslation, validation: (r) => r.required() }),
     defineField({ name: "locality", title: "Town", type: "string", group: "contact", initialValue: "Leh" }),
     defineField({ name: "region", type: "string", group: "contact", initialValue: "Ladakh" }),
-    defineField({ name: "postalCode", type: "string", group: "contact" }),
-    defineField({ name: "latitude", type: "number", group: "contact", description: "Office location for the map link." }),
-    defineField({ name: "longitude", type: "number", group: "contact" }),
-    defineField({ name: "openingHours", type: "string", group: "contact", description: 'For Google, e.g. "Mo-Su 09:00-18:00".' }),
+    defineField({ name: "postalCode", type: "string", group: "contact", readOnly: isTranslation }),
+    defineField({ name: "latitude", type: "number", group: "contact", readOnly: isTranslation, description: "Office location for the map link." }),
+    defineField({ name: "longitude", type: "number", group: "contact", readOnly: isTranslation }),
+    defineField({ name: "openingHours", type: "string", group: "contact", readOnly: isTranslation, description: 'For Google, e.g. "Mo-Su 09:00-18:00".' }),
     defineField({ name: "defaultTitle", title: "Home page title", type: "string", group: "seo", validation: (r) => r.required() }),
     defineField({ name: "description", title: "Default description", type: "text", rows: 3, group: "seo" }),
     defineField({ name: "keywords", type: "array", of: [defineArrayMember({ type: "string" })], options: { layout: "tags" }, group: "seo" }),
@@ -65,7 +77,7 @@ export const siteSettings = defineType({
     defineField({ name: "listingCtaTitle", title: "Category page banner heading", type: "string", group: "text" }),
     defineField({ name: "listingCtaText", title: "Category page banner text", type: "text", rows: 2, group: "text" }),
   ],
-  preview: { prepare: () => ({ title: "Site settings" }) },
+  preview: pagePreview("Site settings"),
 });
 
 export const homePage = defineType({
@@ -81,6 +93,7 @@ export const homePage = defineType({
     { name: "faq", title: "FAQ" },
   ],
   fields: [
+    languageField("hero"),
     defineField({ name: "heroKicker", title: "Kicker", type: "string", group: "hero" }),
     defineField({ name: "heroTitle", title: "Heading", type: "string", group: "hero", validation: (r) => r.required() }),
     defineField({ name: "heroTitleEmphasis", title: "Heading (italic ending)", type: "string", group: "hero", description: "Shown in italics after the heading." }),
@@ -104,8 +117,9 @@ export const homePage = defineType({
       title: "Featured trips",
       type: "array",
       group: "featured",
-      description: "Up to 6 trips shown on the home page, in this order. Leave empty to show the first trip from each of the first three categories.",
-      of: [defineArrayMember({ type: "reference", to: [{ type: "trip" }], options: { disableNew: true } })],
+      readOnly: isTranslation,
+      description: "Up to 6 trips shown on the home page, in this order, in every language. Leave empty to show the first trip from each of the first three categories.",
+      of: [defineArrayMember({ type: "reference", to: [{ type: "trip" }], options: { disableNew: true, filter: "!defined(language)" } })],
       validation: (r) => r.unique().max(6),
     }),
     defineField({ name: "whyKicker", type: "string", group: "sections" }),
@@ -127,7 +141,7 @@ export const homePage = defineType({
     defineField({ name: "faqTitle", type: "string", group: "faq" }),
     defineField({ name: "faqs", type: "array", group: "faq", of: [defineArrayMember({ type: "faq" })] }),
   ],
-  preview: { prepare: () => ({ title: "Home page" }) },
+  preview: pagePreview("Home page"),
 });
 
 export const aboutPage = defineType({
@@ -141,6 +155,7 @@ export const aboutPage = defineType({
     { name: "values", title: "Values" },
   ],
   fields: [
+    languageField("story"),
     { ...seoField, group: "story" },
     { ...headerField, group: "story" },
     defineField({ name: "storyTitle", type: "string", group: "story" }),
@@ -158,7 +173,7 @@ export const aboutPage = defineType({
     defineField({ name: "valuesTitle", type: "string", group: "values" }),
     defineField({ name: "values", type: "array", group: "values", of: [defineArrayMember({ type: "textItem" })] }),
   ],
-  preview: { prepare: () => ({ title: "About page" }) },
+  preview: pagePreview("About page"),
 });
 
 export const contactPage = defineType({
@@ -167,12 +182,13 @@ export const contactPage = defineType({
   type: "document",
   icon: DocumentIcon,
   fields: [
+    languageField(),
     seoField,
     headerField,
     defineField({ name: "bannerImage", type: "imageWithAlt" }),
     defineField({ name: "formTitle", type: "string" }),
   ],
-  preview: { prepare: () => ({ title: "Contact page" }) },
+  preview: pagePreview("Contact page"),
 });
 
 export const planTripPage = defineType({
@@ -181,11 +197,12 @@ export const planTripPage = defineType({
   type: "document",
   icon: DocumentIcon,
   fields: [
+    languageField(),
     seoField,
     headerField,
     defineField({ name: "steps", type: "array", of: [defineArrayMember({ type: "textItem" })] }),
   ],
-  preview: { prepare: () => ({ title: "Plan your trip page" }) },
+  preview: pagePreview("Plan your trip page"),
 });
 
 export const SINGLETONS = ["siteSettings", "homePage", "aboutPage", "contactPage", "planTripPage"];

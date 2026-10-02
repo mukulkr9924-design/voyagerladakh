@@ -1,11 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import Link from "next/link";
 import { gsap } from "gsap";
 import { AnimatePresence, motion } from "framer-motion";
 
+import { useI18n } from "@/components/I18nProvider";
+import Link from "@/components/LocaleLink";
 import type { MapStop } from "@/lib/content";
+import { LANGUAGES } from "@/lib/i18n";
 
 type LabelSide = MapStop["label"];
 
@@ -14,7 +16,7 @@ type LabelSide = MapStop["label"];
 const BENDS = [0.18, -0.22, 0.28, 0.22, -0.3, 0.2, -0.16, 0.22];
 const bendAt = (i: number) => BENDS[i] ?? (i % 2 ? -0.2 : 0.2);
 
-// Mountain passes drawn on the road between two named stops, `t` of the way along.
+// Mountain passes drawn on the road between two stops (by their English names), `t` of the way along.
 const PASSES = [
   { name: "Namika La", from: "Mulbek", to: "Lamayuru", t: 0.35 },
   { name: "Fotu La", from: "Mulbek", to: "Lamayuru", t: 0.78 },
@@ -51,7 +53,7 @@ function routeGeometry(stops: MapStop[]) {
   const routeD = segments.map((d, i) => (i === 0 ? d : d.replace(/^M[^Q]+/, ""))).join(" ");
 
   const passes = PASSES.flatMap((p) => {
-    const i = stops.findIndex((s, k) => s.name === p.from && stops[k + 1]?.name === p.to);
+    const i = stops.findIndex((s, k) => s.ref === p.from && stops[k + 1]?.ref === p.to);
     return i === -1 ? [] : [{ name: p.name, ...pointOnSegment(i, p.t) }];
   });
 
@@ -106,6 +108,8 @@ function labelProps(side: LabelSide) {
 }
 
 export default function AnimatedRouteMap({ stops, kicker, title, intro }: { stops: MapStop[]; kicker?: string; title?: string; intro?: string }) {
+  const { locale, t } = useI18n();
+  const rtl = LANGUAGES[locale].dir === "rtl";
   const { segments, routeD, passes } = useMemo(() => routeGeometry(stops), [stops]);
   const sectionRef = useRef<HTMLElement>(null);
   const baseRef = useRef<SVGPathElement>(null);
@@ -253,8 +257,9 @@ export default function AnimatedRouteMap({ stops, kicker, title, intro }: { stop
       </motion.div>
 
       <div className={`lmap-shell${revealed ? " is-revealed" : ""}`} onKeyDown={onKeyDown}>
-        <div className="lmap-canvas">
-          <svg className="lmap-svg" viewBox="0 0 1000 600" role="group" aria-label="Illustrated map of major tourist stops in Ladakh">
+        {/* A map: east stays on the right in every language. */}
+        <div className="lmap-canvas" dir="ltr">
+          <svg className="lmap-svg" viewBox="0 0 1000 600" role="group" aria-label={t.map.label}>
             <defs>
               <radialGradient id="lmap-bg" cx="45%" cy="40%" r="80%">
                 <stop offset="0%" stopColor="#24473a" />
@@ -280,18 +285,18 @@ export default function AnimatedRouteMap({ stops, kicker, title, intro }: { stop
             </g>
 
             <g className="lmap-ranges" aria-hidden="true">
-              <text x="620" y="42">KARAKORAM RANGE</text>
-              <text x="655" y="318" transform="rotate(-10 655 318)">LADAKH RANGE</text>
-              <text x="250" y="470" transform="rotate(-18 250 470)">ZANSKAR RANGE</text>
-              <text x="820" y="368">CHANGTHANG PLATEAU</text>
+              <text x="620" y="42">{t.map.karakoram}</text>
+              <text x="655" y="318" transform="rotate(-10 655 318)">{t.map.ladakhRange}</text>
+              <text x="250" y="470" transform="rotate(-18 250 470)">{t.map.zanskar}</text>
+              <text x="820" y="368">{t.map.changthang}</text>
             </g>
 
             <g className="lmap-rivers" aria-hidden="true">
               <path d="M1010 440 C930 450, 860 420, 780 410 S620 385, 545 355 S430 345, 380 300 S330 230, 345 170 S260 95, 160 45 S70 0, 20 -20" />
               <path d="M40 360 C70 300, 85 240, 95 190 S140 100, 175 60" />
               <path d="M720 270 C700 200, 660 160, 600 152 S480 128, 410 95 S300 40, 240 -10" />
-              <text x="585" y="376" transform="rotate(12 585 376)">Indus</text>
-              <text x="628" y="148" transform="rotate(8 628 148)">Shyok</text>
+              <text x="585" y="376" transform="rotate(12 585 376)">{t.map.indus}</text>
+              <text x="628" y="148" transform="rotate(8 628 148)">{t.map.shyok}</text>
             </g>
 
             <g aria-hidden="true">
@@ -374,23 +379,23 @@ export default function AnimatedRouteMap({ stops, kicker, title, intro }: { stop
               <circle r="24" />
               <path d="M0 -20 L6 0 L0 20 L-6 0 Z" />
               <path d="M0 -20 L6 0 L-6 0 Z" className="north" />
-              <text y="-30">N</text>
+              <text y="-30">{t.map.north}</text>
             </g>
-            <text className="lmap-note" x="24" y="584">Illustrative map · not to scale</text>
+            <text className="lmap-note" x="24" y="584">{t.map.note}</text>
           </svg>
 
           <button
             type="button"
             className="lmap-play"
             onClick={() => setAutoplay((v) => !v)}
-            aria-label={autoplay ? "Pause guided tour" : "Play guided tour"}
+            aria-label={autoplay ? t.map.pauseTour : t.map.playTour}
           >
             {autoplay ? (
               <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="2" width="3.5" height="12" rx="1" /><rect x="9.5" y="2" width="3.5" height="12" rx="1" /></svg>
             ) : (
               <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.5v11l9.5-5.5z" /></svg>
             )}
-            <span>{autoplay ? "Touring" : "Tour"}</span>
+            <span>{autoplay ? t.map.touring : t.map.tour}</span>
           </button>
         </div>
 
@@ -427,14 +432,14 @@ export default function AnimatedRouteMap({ stops, kicker, title, intro }: { stop
           </AnimatePresence>
 
           <div className="lmap-controls">
-            <button type="button" onClick={() => select(active - 1)} aria-label="Previous stop">←</button>
-            <button type="button" onClick={() => select(active + 1)} aria-label="Next stop">→</button>
-            <Link href="/plan-your-trip" className="lmap-cta">Plan this route</Link>
+            <button type="button" onClick={() => select(active - 1)} aria-label={t.map.previousStop}>{rtl ? "→" : "←"}</button>
+            <button type="button" onClick={() => select(active + 1)} aria-label={t.map.nextStop}>{rtl ? "←" : "→"}</button>
+            <Link href="/plan-your-trip" className="lmap-cta">{t.map.planRoute}</Link>
           </div>
         </aside>
       </div>
 
-      <div ref={railRef} className="lmap-rail" role="tablist" aria-label="Ladakh stops">
+      <div ref={railRef} className="lmap-rail" role="tablist" aria-label={t.map.stops}>
         {stops.map((s, i) => (
           <button
             key={s.name}

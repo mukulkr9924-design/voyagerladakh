@@ -1,42 +1,73 @@
 import { defineDocuments, defineLocations, type PresentationPluginOptions } from "sanity/presentation";
+import { DEFAULT_LOCALE, hasLocale, type Locale, localePath, LOCALES, TRANSLATED_LOCALES } from "@/lib/i18n";
 import { activityLabels, type ActivityType } from "@/lib/trips";
+import { translationId } from "@/sanity/translations";
 
-const page = (title: string, href: string) => defineLocations({ locations: [{ title, href }] });
-const HOME = { title: "Home", href: "/" };
+/** A document's language: set on translations, empty on English documents. */
+const languageOf = (doc: { language?: string } | null): Locale => (hasLocale(doc?.language) ? doc.language : DEFAULT_LOCALE);
+
+const page = (title: string, path: string) =>
+  defineLocations({
+    select: { language: "language" },
+    resolve: (doc) => ({ locations: [{ title, href: localePath(languageOf(doc), path) }] }),
+  });
 
 // Which pages each document appears on, shown at the top of the editor in Presentation.
 const locations: NonNullable<PresentationPluginOptions["resolve"]>["locations"] = {
   trip: defineLocations({
-    select: { title: "title", slug: "slug.current", type: "activityType" },
+    select: { title: "title", slug: "slug.current", type: "activityType", language: "language" },
     resolve: (doc) =>
       doc?.slug && doc.type
         ? {
             locations: [
-              { title: doc.title || "Untitled trip", href: `/${doc.type}/${doc.slug}` },
-              { title: activityLabels[doc.type as ActivityType] ?? doc.type, href: `/${doc.type}` },
+              { title: doc.title || "Untitled trip", href: localePath(languageOf(doc), `/${doc.type}/${doc.slug}`) },
+              { title: activityLabels[doc.type as ActivityType] ?? doc.type, href: localePath(languageOf(doc), `/${doc.type}`) },
             ],
           }
         : null,
   }),
   activity: defineLocations({
-    select: { name: "name", type: "type" },
-    resolve: (doc) => (doc?.type ? { locations: [{ title: doc.name || doc.type, href: `/${doc.type}` }, HOME] } : null),
+    select: { name: "name", type: "type", language: "language" },
+    resolve: (doc) =>
+      doc?.type
+        ? {
+            locations: [
+              { title: doc.name || doc.type, href: localePath(languageOf(doc), `/${doc.type}`) },
+              { title: "Home", href: localePath(languageOf(doc), "/") },
+            ],
+          }
+        : null,
   }),
   homePage: page("Home", "/"),
   aboutPage: page("About", "/about"),
   contactPage: page("Contact", "/contact"),
   planTripPage: page("Plan your trip", "/plan-your-trip"),
-  siteSettings: defineLocations({ message: "Used in the header, footer and banners on every page", locations: [HOME] }),
+  siteSettings: defineLocations({
+    select: { language: "language" },
+    resolve: (doc) => ({
+      message: "Used in the header, footer and banners on every page",
+      locations: [{ title: "Home", href: localePath(languageOf(doc), "/") }],
+    }),
+  }),
 };
 
-// Which document opens beside the preview for each URL. Fixed paths come before the patterns.
+const idIn = (id: string, locale: Locale) => (locale === DEFAULT_LOCALE ? id : translationId(id, locale));
+
+// Which document opens beside the preview for each URL. Fixed paths come before the patterns, and
+// "/fr/:type" before "/:type/:slug", which would match it too.
 const mainDocuments = defineDocuments([
-  { route: "/", filter: `_id == "homePage"` },
-  { route: "/about", filter: `_id == "aboutPage"` },
-  { route: "/contact", filter: `_id == "contactPage"` },
-  { route: "/plan-your-trip", filter: `_id == "planTripPage"` },
-  { route: "/:type", filter: `_type == "activity" && type == $type` },
-  { route: "/:type/:slug", filter: `_type == "trip" && activityType == $type && slug.current == $slug` },
+  ...LOCALES.flatMap((locale) => [
+    { route: localePath(locale, "/"), filter: `_id == "${idIn("homePage", locale)}"` },
+    { route: localePath(locale, "/about"), filter: `_id == "${idIn("aboutPage", locale)}"` },
+    { route: localePath(locale, "/contact"), filter: `_id == "${idIn("contactPage", locale)}"` },
+    { route: localePath(locale, "/plan-your-trip"), filter: `_id == "${idIn("planTripPage", locale)}"` },
+  ]),
+  ...TRANSLATED_LOCALES.flatMap((locale) => [
+    { route: `/${locale}/:type`, filter: `_type == "activity" && type == $type && language == "${locale}"` },
+    { route: `/${locale}/:type/:slug`, filter: `_type == "trip" && activityType == $type && slug.current == $slug && language == "${locale}"` },
+  ]),
+  { route: "/:type", filter: `_type == "activity" && type == $type && !defined(language)` },
+  { route: "/:type/:slug", filter: `_type == "trip" && activityType == $type && slug.current == $slug && !defined(language)` },
 ]);
 
 export const presentation: PresentationPluginOptions = {

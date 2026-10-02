@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
+import { hasLocale, LANGUAGES } from "@/lib/i18n";
 import { clientIp, rateLimit } from "@/lib/rateLimit";
 
 const resend = new Resend(process.env.RESEND_KEY);
@@ -39,6 +40,8 @@ export async function POST(request: Request) {
     const message = String(payload?.message ?? "").trim();
     const activity = String(payload?.activity ?? "").trim();
     const travelMonth = String(payload?.travelMonth ?? "").trim();
+    // The site language the visitor wrote from, so the team knows which language to reply in.
+    const language = hasLocale(payload?.language) ? LANGUAGES[payload.language as keyof typeof LANGUAGES].name : "English";
 
     if (!contactName || !contactEmail) {
       return NextResponse.json(
@@ -58,6 +61,7 @@ export async function POST(request: Request) {
       `Phone: ${phone || "Not provided"}`,
       `Activity: ${activity || "Not provided"}`,
       `Travel month: ${travelMonth || "Not provided"}`,
+      `Site language: ${language}`,
       `Message: ${message || "Not provided"}`,
     ].join("\n");
 
@@ -73,6 +77,7 @@ export async function POST(request: Request) {
           <p><strong>Phone:</strong> ${escapeHtml(phone || "Not provided")}</p>
           <p><strong>Activity:</strong> ${escapeHtml(activity || "Not provided")}</p>
           <p><strong>Travel month:</strong> ${escapeHtml(travelMonth || "Not provided")}</p>
+          <p><strong>Site language:</strong> ${escapeHtml(language)}</p>
           <p><strong>Message:</strong></p>
           <div style="background: #f7f7f3; padding: 18px; border-left: 3px solid #bc7a35; white-space: pre-wrap;">${escapeHtml(message || "Not provided")}</div>
         </div>

@@ -11,7 +11,7 @@ export const SANITY_TAG = "sanity";
 
 // Fields the site compares or branches on. Visual editing's invisible markers would break those
 // checks (e.g. a trip's category or "round trip" detection), so these stay unmarked in previews.
-const UNMARKED_FIELDS = new Set(["activityType", "type", "difficulty", "kind", "label", "start", "end", "email", "phone"]);
+const UNMARKED_FIELDS = new Set(["activityType", "type", "difficulty", "kind", "label", "start", "end", "email", "phone", "language"]);
 
 /** Reads drafts and marks text for click-to-edit. Only used while previewing in the Studio. */
 const previewClient = client.withConfig({

@@ -1,14 +1,16 @@
-import Link from "next/link";
 import Hero from "@/components/Hero";
+import Link from "@/components/LocaleLink";
 import TripCard from "@/components/TripCard";
 import LazyRouteMap from "@/components/LazyRouteMap";
 import CtaBand from "@/components/CtaBand";
 import { ActivityIcon, ArrowIcon } from "@/components/Icons";
 import { getActivities, getTrips, type HomePage } from "@/lib/content";
+import { plural } from "@/lib/i18n";
+import { getI18n } from "@/lib/locale";
 import type { Trip } from "@/lib/trips";
 
 export default async function HomeContent({ home }: { home: HomePage }) {
-  const [activities, trips] = await Promise.all([getActivities(), getTrips()]);
+  const [activities, trips, { locale, t }] = await Promise.all([getActivities(), getTrips(), getI18n()]);
   const picked = home.featuredTripIds.map((id) => trips.find((t) => t.id === id)).filter((t): t is Trip => t !== undefined);
   // With nothing picked in the Studio, feature the first trip of the first three categories.
   const featured = picked.length > 0
@@ -33,7 +35,7 @@ export default async function HomeContent({ home }: { home: HomePage }) {
               </h3>
               <p>{a.short}</p>
               <p className="activity-foot">
-                {trips.filter((t) => t.activityType === a.type).length} journeys <ArrowIcon />
+                {plural(locale, trips.filter((trip) => trip.activityType === a.type).length, t.home.journeys)} <ArrowIcon />
               </p>
             </article>
           ))}
@@ -51,7 +53,7 @@ export default async function HomeContent({ home }: { home: HomePage }) {
               {home.featuredKicker && <p className="kicker">{home.featuredKicker}</p>}
               <h2 id="featured-title">{home.featuredTitle}</h2>
             </div>
-            <Link href="/trekking-hiking" className="text-link">All treks <ArrowIcon /></Link>
+            <Link href="/trekking-hiking" className="text-link">{t.home.allTreks} <ArrowIcon /></Link>
           </div>
           <div className="trip-grid">
             {featured.map((trip) => <TripCard key={trip.id} trip={trip} />)}
@@ -83,7 +85,7 @@ export default async function HomeContent({ home }: { home: HomePage }) {
             <div className="section-heading">
               {home.faqKicker && <p className="kicker">{home.faqKicker}</p>}
               <h2 id="faq-title">{home.faqTitle}</h2>
-              <p className="section-lede">Still have questions? <Link href="/contact" className="inline-link">Talk to our team</Link>.</p>
+              <p className="section-lede">{t.home.stillHaveQuestions} <Link href="/contact" className="inline-link">{t.home.talkToTeam}</Link>.</p>
             </div>
             <div className="faq-list">
               {home.faqs.map((f) => (

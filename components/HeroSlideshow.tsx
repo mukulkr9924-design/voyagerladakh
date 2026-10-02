@@ -2,6 +2,8 @@
 
 import Image from "next/image";
 import { useEffect, useState, useSyncExternalStore } from "react";
+import { useI18n } from "@/components/I18nProvider";
+import { format } from "@/lib/i18n";
 import type { SanityImage } from "@/lib/trips";
 
 const INTERVAL_MS = 6000;
@@ -14,6 +16,7 @@ function subscribeReducedMotion(onChange: () => void) {
 }
 
 export default function HeroSlideshow({ slides }: { slides: SanityImage[] }) {
+  const { t } = useI18n();
   const [active, setActive] = useState(0);
   // Slides up to this index have their photo in the page. The rest are added just before they're
   // shown: stacked in the viewport, they'd otherwise all download alongside the first photo.
@@ -81,7 +84,7 @@ export default function HeroSlideshow({ slides }: { slides: SanityImage[] }) {
             key={slide.url}
             type="button"
             className="hero-dot"
-            aria-label={`Show photo ${i + 1} of ${slides.length}`}
+            aria-label={format(t.slideshow.showPhoto, { n: i + 1, total: slides.length })}
             aria-current={i === active}
             onClick={() => show(i)}
           />
@@ -89,7 +92,7 @@ export default function HeroSlideshow({ slides }: { slides: SanityImage[] }) {
         <button
           type="button"
           className="hero-pause"
-          aria-label={paused ? "Play slideshow" : "Pause slideshow"}
+          aria-label={paused ? t.slideshow.play : t.slideshow.pause}
           onClick={() => setUserPaused(!paused)}
         >
           {paused ? (

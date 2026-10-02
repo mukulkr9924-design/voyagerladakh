@@ -2,20 +2,19 @@ import type { Metadata } from "next";
 import { stegaClean } from "next-sanity";
 import HomeContent from "@/components/HomeContent";
 import JsonLd from "@/components/JsonLd";
-import { SITE_NAME, SITE_URL, socialFor } from "@/lib/activities";
+import { absoluteUrl, pageMeta, SITE_NAME, SITE_URL } from "@/lib/activities";
 import { getHomePage, getSettings } from "@/lib/content";
+import { LANGUAGES, localePath } from "@/lib/i18n";
+import { getLocale } from "@/lib/locale";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const [home, { defaultTitle, description }] = stegaClean(await Promise.all([getHomePage(), getSettings()]));
-  return {
-    alternates: { canonical: "/" },
-    // Share the first slideshow photo rather than the square logo.
-    ...socialFor("/", defaultTitle, description, home.heroSlides[0]),
-  };
+  const [locale, home, { defaultTitle, description }] = stegaClean(await Promise.all([getLocale(), getHomePage(), getSettings()]));
+  // Share the first slideshow photo rather than the square logo.
+  return pageMeta(locale, "/", defaultTitle, description, home.heroSlides[0]);
 }
 
 export default async function HomePage() {
-  const home = await getHomePage();
+  const [locale, home] = await Promise.all([getLocale(), getHomePage()]);
   return (
     <>
       <HomeContent home={home} />
@@ -26,9 +25,9 @@ export default async function HomePage() {
           "@type": "WebSite",
           "@id": `${SITE_URL}/#website`,
           name: SITE_NAME,
-          url: SITE_URL,
+          url: absoluteUrl(localePath(locale, "/")),
           publisher: { "@id": `${SITE_URL}/#organization` },
-          inLanguage: "en-IN",
+          inLanguage: LANGUAGES[locale].tag,
         }}
       />
       {home.faqs.length > 0 && (

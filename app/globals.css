@@ -16,8 +16,9 @@
   --muted: #5b6b62;
   --line: #e2dbc7;
 
-  --font-body: var(--font-sans), system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-heading: var(--font-display), Georgia, "Times New Roman", serif;
+  /* Hebrew letters fall through to Heebo and Frank Ruhl Libre. */
+  --font-body: var(--font-sans), var(--font-hebrew-sans), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-heading: var(--font-display), var(--font-hebrew-display), Georgia, "Times New Roman", serif;
 
   --radius: 18px;
   --radius-sm: 12px;
@@ -97,7 +98,7 @@ p {
 
 .skip-link {
   position: absolute;
-  left: 16px;
+  inset-inline-start: 16px;
   top: -60px;
   z-index: 100;
   padding: 10px 18px;
@@ -259,7 +260,7 @@ p {
 }
 
 .main-nav {
-  margin-left: auto;
+  margin-inline-start: auto;
 }
 
 .main-nav > ul {
@@ -419,7 +420,7 @@ p {
   z-index: 70;
   width: 44px;
   height: 44px;
-  margin-left: auto;
+  margin-inline-start: auto;
   padding: 0;
   border: 1px solid var(--line);
   border-radius: 50%;
@@ -463,7 +464,7 @@ p {
 .mobile-drawer {
   position: fixed;
   top: 0;
-  right: 0;
+  inset-inline-end: 0;
   bottom: 0;
   z-index: 60;
   display: flex;
@@ -485,7 +486,7 @@ p {
 .drawer-logo {
   position: absolute;
   top: 12px;
-  left: 28px;
+  inset-inline-start: 28px;
 }
 
 .drawer-logo img {
@@ -618,7 +619,7 @@ p {
 .hero-controls {
   position: absolute;
   top: 24px;
-  right: max(var(--gutter), calc((100% - var(--container)) / 2 + var(--gutter)));
+  inset-inline-end: max(var(--gutter), calc((100% - var(--container)) / 2 + var(--gutter)));
   z-index: 1;
   display: flex;
   align-items: center;
@@ -646,7 +647,7 @@ p {
   place-items: center;
   width: 30px;
   height: 30px;
-  margin-left: 4px;
+  margin-inline-start: 4px;
   padding: 0;
   border: 1px solid rgba(255, 254, 250, 0.3);
   border-radius: 999px;
@@ -739,7 +740,7 @@ p {
 }
 
 .hero-stats div + div {
-  border-left: 1px solid rgba(255, 254, 250, 0.16);
+  border-inline-start: 1px solid rgba(255, 254, 250, 0.16);
 }
 
 .hero-stats dt {
@@ -910,7 +911,7 @@ p {
 .badge {
   position: absolute;
   top: 14px;
-  left: 14px;
+  inset-inline-start: 14px;
   padding: 6px 12px;
   border-radius: 999px;
   font-size: 12px;
@@ -927,7 +928,7 @@ p {
   display: inline-block;
   width: 7px;
   height: 7px;
-  margin-right: 7px;
+  margin-inline-end: 7px;
   border-radius: 50%;
   vertical-align: 1px;
   background: currentColor;
@@ -1212,7 +1213,7 @@ p {
 
 .breadcrumbs li + li::before {
   content: "/";
-  margin-right: 6px;
+  margin-inline-end: 6px;
   opacity: 0.5;
 }
 
@@ -1354,7 +1355,7 @@ p {
   border-radius: var(--radius-sm);
   background: var(--forest-deep);
   color: var(--paper);
-  text-align: left;
+  text-align: start;
   cursor: zoom-in;
   isolation: isolate;
 }
@@ -1400,14 +1401,14 @@ p {
 .gallery-tag {
   position: absolute;
   top: 12px;
-  left: 12px;
+  inset-inline-start: 12px;
 }
 
 .gallery-tile-title {
   position: absolute;
-  right: 48px;
+  inset-inline-end: 48px;
   bottom: 12px;
-  left: 14px;
+  inset-inline-start: 14px;
   font-family: var(--font-heading);
   font-size: 16px;
   line-height: 1.2;
@@ -1419,7 +1420,7 @@ p {
 
 .gallery-zoom {
   position: absolute;
-  right: 12px;
+  inset-inline-end: 12px;
   bottom: 12px;
   display: grid;
   place-items: center;
@@ -1580,8 +1581,8 @@ html:has(.lightbox[open]) {
   translate: 0 -50%;
 }
 
-.lightbox-prev { left: 8px; }
-.lightbox-next { right: 8px; }
+.lightbox-prev { inset-inline-start: 8px; }
+.lightbox-next { inset-inline-end: 8px; }
 .lightbox-prev svg { transform: scaleX(-1); }
 
 .lightbox-info {
@@ -1682,7 +1683,7 @@ html:has(.lightbox[open]) {
   .gallery-n4 .gallery-tile:nth-child(2) { grid-column: span 2; }
 
   .gallery-tile-title { font-size: 14px; }
-  .gallery-tag { top: 8px; left: 8px; font-size: 11px; }
+  .gallery-tag { top: 8px; inset-inline-start: 8px; font-size: 11px; }
   .gallery-zoom { display: none; }
 
   .lightbox-prev,
@@ -1711,7 +1712,7 @@ html:has(.lightbox[open]) {
   position: absolute;
   top: 10px;
   bottom: 10px;
-  left: 7px;
+  inset-inline-start: 7px;
   width: 2px;
   background: linear-gradient(var(--sand), var(--sage));
   opacity: 0.5;
@@ -1719,13 +1720,14 @@ html:has(.lightbox[open]) {
 
 .timeline li {
   position: relative;
-  padding: 0 0 28px 40px;
+  padding: 0 0 28px;
+  padding-inline-start: 40px;
 }
 
 .timeline li::before {
   content: "";
   position: absolute;
-  left: 0;
+  inset-inline-start: 0;
   top: 6px;
   width: 16px;
   height: 16px;
@@ -1993,7 +1995,7 @@ html:has(.lightbox[open]) {
 }
 
 .elev-legend .elev-note {
-  margin-left: auto;
+  margin-inline-start: auto;
   font-style: italic;
 }
 
@@ -2019,7 +2021,7 @@ html:has(.lightbox[open]) {
 .elev-table td {
   padding: 6px 8px;
   border-bottom: 1px solid var(--line);
-  text-align: left;
+  text-align: start;
   font-weight: 400;
 }
 
@@ -2029,7 +2031,7 @@ html:has(.lightbox[open]) {
 }
 
 .elev-table td {
-  text-align: right;
+  text-align: end;
 }
 
 @media (max-width: 640px) {
@@ -2051,7 +2053,7 @@ html:has(.lightbox[open]) {
   }
 
   .elev-legend .elev-note {
-    margin-left: 0;
+    margin-inline-start: 0;
   }
 }
 
@@ -2143,7 +2145,7 @@ html:has(.lightbox[open]) {
 .booking-facts dd {
   margin: 0;
   font-weight: 600;
-  text-align: right;
+  text-align: end;
 }
 
 .booking-note {
@@ -2608,10 +2610,164 @@ html:has(.lightbox[open]) {
   color: var(--sand-light);
 }
 
+/* ============ Languages ============ */
+.lang-switch ul {
+  display: flex;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lang-switch a {
+  display: block;
+  padding: 6px 9px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.lang-switch a:hover {
+  background: rgba(152, 168, 105, 0.14);
+  color: var(--foreground);
+}
+
+.lang-switch a[aria-current] {
+  color: var(--foreground);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+/* Header: one button with a short list, so it takes no more room than a nav link. */
+.lang-menu {
+  position: relative;
+  flex-shrink: 0;
+  margin-inline-end: -14px;
+}
+
+.lang-menu-button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.lang-menu-button svg {
+  width: 17px;
+}
+
+.lang-menu-button:hover,
+.lang-menu-button[aria-expanded="true"] {
+  background: rgba(152, 168, 105, 0.14);
+  color: var(--foreground);
+}
+
+.lang-menu-list {
+  position: absolute;
+  top: calc(100% + 10px);
+  inset-inline-end: 0;
+  z-index: 10;
+  min-width: 150px;
+  margin: 0;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+  box-shadow: var(--shadow-lg);
+  list-style: none;
+}
+
+.lang-menu-list[hidden] {
+  display: none;
+}
+
+.lang-menu-list a {
+  display: block;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 15px;
+  color: var(--text);
+}
+
+.lang-menu-list a:hover {
+  background: rgba(152, 168, 105, 0.14);
+}
+
+.lang-menu-list a[aria-current] {
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.drawer-lang ul {
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
+
+.drawer-lang a {
+  padding: 8px 14px;
+  font-size: 15px;
+}
+
+.footer-bottom .lang-switch a {
+  color: rgba(255, 254, 250, 0.7);
+}
+
+.footer-bottom .lang-switch a:hover {
+  background: rgba(255, 254, 250, 0.08);
+  color: var(--paper);
+}
+
+.footer-bottom .lang-switch a[aria-current] {
+  color: var(--paper);
+  box-shadow: inset 0 0 0 1px rgba(255, 254, 250, 0.3);
+}
+
+/* Right-to-left (Hebrew). Most of the layout flips by itself through logical properties
+   (inset-inline-start, margin-inline-end…); these cover arrows and slide-in movements. */
+[dir="rtl"] :is(.text-link, .activity-foot, .trip-card-go) svg {
+  scale: -1 1;
+}
+
+[dir="rtl"] .mobile-drawer {
+  transform: translateX(-100%);
+}
+
+[dir="rtl"] .mobile-drawer.is-open {
+  transform: none;
+}
+
+[dir="rtl"] .contact-card:hover {
+  transform: translateX(-4px);
+}
+
+[dir="rtl"] .lightbox-prev svg {
+  transform: none;
+}
+
+[dir="rtl"] .lightbox-next svg {
+  transform: scaleX(-1);
+}
+
+/* Hebrew has no capitals, and letter-spacing breaks up its letterforms. */
+html[lang="he"] body * {
+  letter-spacing: normal !important;
+}
+
 /* ============ Floating WhatsApp ============ */
 .floating-whatsapp {
   position: fixed;
-  right: 20px;
+  inset-inline-end: 20px;
   bottom: 20px;
   z-index: 40;
   display: grid;
@@ -2669,6 +2825,7 @@ html:has(.lightbox[open]) {
 /* ============ Responsive ============ */
 @media (max-width: 1180px) {
   .main-nav,
+  .lang-menu,
   .header-cta {
     display: none;
   }
@@ -2701,7 +2858,7 @@ html:has(.lightbox[open]) {
   }
 
   .hero-stats div:nth-child(3) {
-    border-left: 0;
+    border-inline-start: 0;
   }
 
   .hero-stats div:nth-child(n + 3) {
@@ -2767,7 +2924,7 @@ html:has(.lightbox[open]) {
   }
 
   .floating-whatsapp {
-    right: 14px;
+    inset-inline-end: 14px;
     bottom: 14px;
     width: 52px;
     height: 52px;
@@ -3165,7 +3322,7 @@ html:has(.lightbox[open]) {
 
 .lmap-highlights li {
   position: relative;
-  padding-left: 20px;
+  padding-inline-start: 20px;
   font-size: 14px;
   color: var(--text);
 }
@@ -3173,7 +3330,7 @@ html:has(.lightbox[open]) {
 .lmap-highlights li::before {
   content: "";
   position: absolute;
-  left: 2px;
+  inset-inline-start: 2px;
   top: 7px;
   width: 7px;
   height: 7px;
@@ -3206,7 +3363,7 @@ html:has(.lightbox[open]) {
 }
 
 body a.lmap-cta {
-  margin-left: auto;
+  margin-inline-start: auto;
   padding: 11px 20px;
   border-radius: 999px;
   background: var(--foreground);
